@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import dev.skybit.bluetoothchat.core.presentation.style.tokens.AppFont.robotoFont
 
-val Typography = Typography(
+val AppTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = robotoFont,
         fontWeight = FontWeight.SemiBold,

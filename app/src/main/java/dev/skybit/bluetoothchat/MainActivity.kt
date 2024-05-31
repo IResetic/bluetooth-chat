@@ -3,7 +3,6 @@ package dev.skybit.bluetoothchat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -18,7 +17,6 @@ import dev.skybit.bluetoothchat.ui.theme.BluetoothChatTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             BluetoothChatTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
