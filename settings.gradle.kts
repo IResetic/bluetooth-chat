@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Bluetooth Chat"
 include(":app")
- 
