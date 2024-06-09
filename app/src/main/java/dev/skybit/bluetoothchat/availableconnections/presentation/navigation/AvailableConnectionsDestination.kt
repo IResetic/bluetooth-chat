@@ -1,8 +1,8 @@
-package dev.skybit.bluetoothchat.availableconnection.presentation.navigation
+package dev.skybit.bluetoothchat.availableconnections.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import dev.skybit.bluetoothchat.availableconnection.presentation.ui.AvailableConnectionsScreen
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

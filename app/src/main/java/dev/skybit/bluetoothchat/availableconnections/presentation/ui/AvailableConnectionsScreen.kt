@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.availableconnection.presentation.ui
+package dev.skybit.bluetoothchat.availableconnections.presentation.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

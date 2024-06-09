@@ -5,8 +5,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import dev.skybit.bluetoothchat.availableconnection.presentation.navigation.AvailableConnectionsDestination
-import dev.skybit.bluetoothchat.availableconnection.presentation.navigation.availableConnectionsGraph
+import dev.skybit.bluetoothchat.availableconnections.presentation.navigation.AvailableConnectionsDestination
+import dev.skybit.bluetoothchat.availableconnections.presentation.navigation.availableConnectionsGraph
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
