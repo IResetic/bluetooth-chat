@@ -19,6 +19,7 @@ serialization = "1.6.3"
 splashScreen = "1.0.1"
 mockk = "1.13.11"
 turbineVersion = "1.1.0"
+core = "1.44.0"
 
 [libraries]
 # ***** Core *****
@@ -57,6 +58,7 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 # ***** Navigation *****
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+core = { group = "com.google.ar", name = "core", version.ref = "core" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -11,6 +11,7 @@ import dev.skybit.bluetoothchat.availableconnections.data.mappers.toBluetoothDev
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.FoundDeviceReceiver
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @SuppressLint("MissingPermission")
 class BluetoothControllerImpl @Inject constructor(
-    private val context: Context
+    private val context: Context,
+    private val buildVersionProvider: BuildVersionProvider
 ) : BluetoothController {
 
     private val bluetoothManager by lazy {
@@ -38,7 +40,7 @@ class BluetoothControllerImpl @Inject constructor(
     override val pairedDevices: StateFlow<List<BluetoothDeviceInfo>>
         get() = _pairedDevices.asStateFlow()
 
-    private val foundDeviceReceiver = FoundDeviceReceiver { device ->
+    private val foundDeviceReceiver = FoundDeviceReceiver(buildVersionProvider) { device ->
         updateScannedDevices(device)
     }
 

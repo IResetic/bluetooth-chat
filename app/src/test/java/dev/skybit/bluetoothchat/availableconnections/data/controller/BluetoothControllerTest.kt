@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.availableconnections.data.controller.availableconnections.data.controller
+package dev.skybit.bluetoothchat.availableconnections.data.controller
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -8,10 +8,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import app.cash.turbine.test
-import dev.skybit.bluetoothchat.availableconnections.data.controller.BluetoothControllerImpl
 import dev.skybit.bluetoothchat.availableconnections.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.FoundDeviceReceiver
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -190,10 +190,6 @@ class BluetoothControllerTest {
         intSut(context)
     }
 
-    private fun intSut(context: Context = mockContext()) {
-        sut = BluetoothControllerImpl(context)
-    }
-
     @Test
     fun `should successfully update scanned devices without pairing if permission is granted`() = runBlocking {
         // define test data
@@ -257,6 +253,17 @@ class BluetoothControllerTest {
             val expected = listOf(testDevice.toBluetoothDeviceInfo())
 
             assertEquals(expected, result)
+        }
+    }
+
+    private fun intSut(context: Context = mockContext()) {
+        val buildVersionProvider = createBuildVersionProvider()
+        sut = BluetoothControllerImpl(context, buildVersionProvider)
+    }
+
+    private fun createBuildVersionProvider(): BuildVersionProvider {
+        return mockk<BuildVersionProvider> {
+            every { this@mockk.isTiramisuAndAbove() } returns true
         }
     }
 
