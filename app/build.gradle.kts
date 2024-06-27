@@ -67,11 +67,18 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // ***** Test *****
+    implementation(libs.hilt.android.testing)
     testImplementation(libs.junit)
+    testImplementation(libs.turbine)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.hilt.android.testing)
+
+    // ***** Mockk *****
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.mockk.android)
 
     // ****** Dependency Injection *****
     implementation(libs.hilt)

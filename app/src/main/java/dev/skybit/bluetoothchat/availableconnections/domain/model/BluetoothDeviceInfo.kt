@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.availableconnections.data.model
+package dev.skybit.bluetoothchat.availableconnections.domain.model
 
 data class BluetoothDeviceInfo(
     val name: String?,

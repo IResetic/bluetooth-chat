@@ -8,8 +8,9 @@ import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import dev.skybit.bluetoothchat.availableconnections.data.mappers.toBluetoothDeviceInfo
-import dev.skybit.bluetoothchat.availableconnections.data.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.FoundDeviceReceiver
+import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,10 +39,7 @@ class BluetoothControllerImpl @Inject constructor(
         get() = _pairedDevices.asStateFlow()
 
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
-        _scannedDevices.update { devices ->
-            val newDevice = device.toBluetoothDeviceInfo()
-            if (newDevice in devices) devices else devices + newDevice
-        }
+        updateScannedDevices(device)
     }
 
     init {
@@ -53,12 +51,10 @@ class BluetoothControllerImpl @Inject constructor(
             return
         }
 
-        context.registerReceiver(
-            foundDeviceReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND)
-        )
+        registerFoundDeviceReceiver()
 
         updatePairedDevices()
+
         bluetoothAdapter?.startDiscovery()
     }
 
@@ -72,6 +68,20 @@ class BluetoothControllerImpl @Inject constructor(
 
     override fun release() {
         context.unregisterReceiver(foundDeviceReceiver)
+    }
+
+    private fun registerFoundDeviceReceiver() {
+        context.registerReceiver(
+            foundDeviceReceiver,
+            IntentFilter(BluetoothDevice.ACTION_FOUND)
+        )
+    }
+
+    private fun updateScannedDevices(device: BluetoothDevice) {
+        _scannedDevices.update { devices ->
+            val newDevice = device.toBluetoothDeviceInfo()
+            if (newDevice in devices) devices else devices + newDevice
+        }
     }
 
     private fun updatePairedDevices() {
