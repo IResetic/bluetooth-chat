@@ -26,7 +26,6 @@ fun AvailableConnectionsScreen() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-
             Button(onClick = { viewModel.onEvent(StartScanning) }) {
                 Text(
                     text = "Available Connection",

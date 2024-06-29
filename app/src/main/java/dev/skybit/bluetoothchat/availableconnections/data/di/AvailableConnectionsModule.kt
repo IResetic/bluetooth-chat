@@ -7,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.availableconnections.data.controller.BluetoothControllerImpl
+import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
 import javax.inject.Singleton
 
 @Module
