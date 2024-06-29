@@ -278,9 +278,9 @@ class BluetoothControllerTest {
         return mockk<Intent> {
             every { this@mockk.toString() } returns BluetoothDevice.ACTION_FOUND
             every { this@mockk.action } returns BluetoothDevice.ACTION_FOUND
-            every { this@mockk.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_NAME) } returns device
+            every { this@mockk.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE) } returns device
             every {
-                this@mockk.getParcelableExtra(BluetoothDevice.EXTRA_NAME, BluetoothDevice::class.java)
+                this@mockk.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
             } returns device
         }
     }
