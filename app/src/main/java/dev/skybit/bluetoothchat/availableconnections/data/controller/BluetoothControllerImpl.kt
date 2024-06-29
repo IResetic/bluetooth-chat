@@ -21,7 +21,7 @@ import javax.inject.Inject
 @SuppressLint("MissingPermission")
 class BluetoothControllerImpl @Inject constructor(
     private val context: Context,
-    private val buildVersionProvider: BuildVersionProvider
+    buildVersionProvider: BuildVersionProvider
 ) : BluetoothController {
 
     private val bluetoothManager by lazy {
