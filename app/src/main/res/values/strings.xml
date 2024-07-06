@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Bluetooth Chat</string>
+
+    <!-- Available Screen -->
+    <string name="start_scanning_button_title">Start</string>
+    <string name="stop_scanning_button_title">Stop</string>
 </resources>
