@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.StartScanning
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.StopScanning
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.StartStopScanning
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -29,21 +27,34 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
         startScanAndPairDevicesListener()
     }
 
+    /*
+    val state = combine(
+        bluetoothController.scannedDevices,
+        bluetoothController.pairedDevices,
+        _state
+    ) { scannedDevices, pairedDevices, state ->
+        state.copy(
+            scannedDevices = scannedDevices,
+            pairedDevices = pairedDevices
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
+    */
+
     fun onEvent(event: AvailableConnectionsScreenEvent) {
         when (event) {
-            StartScanning -> startScanning()
-            StopScanning -> stopScanning()
+            StartStopScanning -> startOrStopScanningForDevices()
         }
     }
 
-    private fun startScanning() {
-        bluetoothController.startDiscovery()
-        setScanningStatus(true)
-    }
-
-    private fun stopScanning() {
-        bluetoothController.startDiscovery()
-        setScanningStatus(false)
+    private fun startOrStopScanningForDevices() {
+        if (state.value.isSceningDevices) {
+            bluetoothController.stopDiscovery()
+            // setScanningStatus(false)
+        } else {
+            bluetoothController.startDiscovery()
+            // setScanningStatus(true)
+        }
+        setScanningStatus(!state.value.isSceningDevices)
     }
 
     private fun setScanningStatus(isScanning: Boolean) {
@@ -65,11 +76,14 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                     scannedDevices = scannedDevices,
                     pairedDevices = pairedDevices
                 )
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT), _state.value).collect()
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, _state.value).collect { newState ->
+                _state.update {
+                    it.copy(
+                        scannedDevices = newState.scannedDevices,
+                        pairedDevices = newState.pairedDevices
+                    )
+                }
+            }
         }
-    }
-
-    companion object {
-        const val TIMEOUT = 5000L
     }
 }

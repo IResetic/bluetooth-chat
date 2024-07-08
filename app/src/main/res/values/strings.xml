@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Bluetooth Chat</string>
 
-    <!-- Available Screen -->
-    <string name="start_scanning_button_title">Start</string>
+    <!-- Available Connections Screen -->
+    <string name="start_scanning_button_title">Scan</string>
     <string name="stop_scanning_button_title">Stop</string>
+    <string name="unknown_connection_name">Unknown</string>
+    <string name="pair_devices_header">Paired devices</string>
+    <string name="available_devices_header">Available devices</string>
 </resources>
