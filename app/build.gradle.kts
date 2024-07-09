@@ -76,6 +76,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.hilt.android.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // ***** Mockk *****
     testImplementation(libs.mockk.agent)

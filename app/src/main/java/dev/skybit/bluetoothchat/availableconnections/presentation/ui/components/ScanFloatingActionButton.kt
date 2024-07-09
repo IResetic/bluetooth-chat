@@ -36,7 +36,7 @@ fun ScanFab(
 ) {
     ExtendedFloatingActionButton(
         onClick = {
-            onClick(AvailableConnectionsScreenEvent.StartStopScanning)
+            onClick(AvailableConnectionsScreenEvent.StartScanning)
         },
         containerColor = MaterialTheme.colorScheme.inversePrimary,
         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -66,7 +66,7 @@ fun StopFab(
 ) {
     ExtendedFloatingActionButton(
         onClick = {
-            onClick(AvailableConnectionsScreenEvent.StartStopScanning)
+            onClick(AvailableConnectionsScreenEvent.StopScanning)
         },
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
