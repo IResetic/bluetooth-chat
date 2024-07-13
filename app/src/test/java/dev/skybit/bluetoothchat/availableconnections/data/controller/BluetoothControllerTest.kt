@@ -3,29 +3,50 @@ package dev.skybit.bluetoothchat.availableconnections.data.controller
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothServerSocket
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import app.cash.turbine.test
+import dev.skybit.bluetoothchat.availableconnections.data.controller.BluetoothControllerImpl.Companion.SERVICE_UUID
 import dev.skybit.bluetoothchat.availableconnections.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.FoundDeviceReceiver
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.availableconnections.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.IOException
+import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("DEPRECATION")
 class BluetoothControllerTest {
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var sut: BluetoothController
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `should successfully paired device when permission is granted and controller is initializing`() = runBlocking {
@@ -36,7 +57,7 @@ class BluetoothControllerTest {
         )
 
         // init sut
-        intSut(context)
+        initSut(context)
 
         // check assertion
         sut.pairedDevices.test {
@@ -56,7 +77,7 @@ class BluetoothControllerTest {
         )
 
         // init sut
-        intSut(context)
+        initSut(context)
 
         // check assertion
         sut.pairedDevices.test {
@@ -77,7 +98,7 @@ class BluetoothControllerTest {
             bondedDevices = setOf(device),
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.startDiscovery()
@@ -101,7 +122,7 @@ class BluetoothControllerTest {
         )
 
         // init sut
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.startDiscovery()
@@ -123,7 +144,7 @@ class BluetoothControllerTest {
             bluetoothAdapter = adapter,
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.stopDiscovery()
@@ -144,7 +165,7 @@ class BluetoothControllerTest {
             permission = PackageManager.PERMISSION_DENIED,
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.stopDiscovery()
@@ -164,7 +185,7 @@ class BluetoothControllerTest {
             bondedDevices = setOf(device),
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.startDiscovery()
@@ -173,7 +194,7 @@ class BluetoothControllerTest {
         val mockIntent = setMockFoundDeviceIntent(device)
         slot.captured.onReceive(context, mockIntent)
 
-        verify(exactly = 1) { context.unregisterReceiver(any()) }
+        verify { context.unregisterReceiver(any()) }
     }
 
     @Test
@@ -187,7 +208,7 @@ class BluetoothControllerTest {
             bluetoothAdapter = adapter,
             slot = slot
         )
-        intSut(context)
+        initSut(context)
     }
 
     @Test
@@ -203,7 +224,7 @@ class BluetoothControllerTest {
             bondedDevices = emptySet(),
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.startDiscovery()
@@ -233,14 +254,14 @@ class BluetoothControllerTest {
             bondedDevices = setOf(testDevice),
             slot = slot
         )
-        intSut(context)
+        initSut(context)
 
         // trigger action
         sut.startDiscovery()
         val mockIntent = setMockFoundDeviceIntent(testDevice)
         slot.captured.onReceive(context, mockIntent)
 
-        // assertion
+        // check assertion
         verify { adapter.startDiscovery() }
         sut.scannedDevices.test {
             val result = awaitItem()
@@ -256,13 +277,118 @@ class BluetoothControllerTest {
         }
     }
 
-    private fun intSut(context: Context = mockContext()) {
+    @Test
+    fun `should start Bluetooth server and emit ConnectionEstablished`() = runBlocking {
+        // define test data
+        val mockServerSocket: BluetoothServerSocket = mockk()
+        val mockClientSocket: BluetoothSocket = mockk()
+        val bluetoothAdapter: BluetoothAdapter = mockk {
+            every {
+                listenUsingRfcommWithServiceRecord(
+                    any(),
+                    UUID.fromString(SERVICE_UUID)
+                )
+            } returns mockServerSocket
+        }
+        every { mockServerSocket.accept() } returns mockClientSocket
+
+        // Init sut
+        val context = mockContext(bluetoothAdapter = bluetoothAdapter)
+        initSut(context)
+
+        // trigger action
+        val flow = sut.startBluetoothServer()
+
+        // check assertion
+        flow.test {
+            assertEquals(ConnectionResult.ConnectionEstablished, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `should connect to device and emit ConnectionEstablished`() = runBlocking {
+        // define test data
+        val device = BluetoothDeviceInfo("Name", "Address")
+        val mockClientSocket: BluetoothSocket = mockk(relaxed = true)
+
+        val bluetoothAdapter = setBluetoothAdapter(mockClientSocket = mockClientSocket, device = device)
+
+        // init sut
+        val context = mockContext(bluetoothAdapter = bluetoothAdapter)
+        initSut(context)
+
+        // trigger action
+        val flow = sut.connectToDevice(device)
+
+        // check assertion
+        flow.test {
+            assertEquals(ConnectionResult.ConnectionEstablished, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { mockClientSocket.connect() }
+    }
+
+    @Test
+    fun `should emit Error when connect to device throws IOException`() = runBlocking {
+        // define test data
+        val device = BluetoothDeviceInfo("Name", "Address")
+        val mockClientSocket: BluetoothSocket = mockk(relaxed = true) {
+            every { connect() } throws IOException()
+        }
+
+        val bluetoothAdapter = setBluetoothAdapter(
+            mockClientSocket = mockClientSocket,
+            device = device
+        )
+
+        // init sut
+        val context = mockContext(bluetoothAdapter = bluetoothAdapter)
+        initSut(context)
+
+        // trigger action
+        val flow = sut.connectToDevice(device)
+
+        // check assertion
+        flow.test {
+            assertEquals(ConnectionResult.Error("Connection was interrupted"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { mockClientSocket.close() }
+    }
+
+    @Test
+    fun `should close connection`() = runBlocking {
+        // Define test data
+        // val device = BluetoothDeviceInfo("Name", "Address")
+        val mockClientSocket: BluetoothSocket = mockk(relaxed = true)
+        val mockServerSocket: BluetoothServerSocket = mockk(relaxed = true)
+
+        val bluetoothAdapter = setBluetoothAdapter(mockClientSocket, mockServerSocket)
+
+        val context = mockContext(bluetoothAdapter = bluetoothAdapter)
+
+        // init sut
+        initSut(context)
+
+        // trigger action
+        sut.startBluetoothServer().first()
+        sut.connectToDevice(BluetoothDeviceInfo("Name", "Address")).first()
+
+        sut.closeConnection()
+
+        // check assertion
+        verify { mockClientSocket.close() }
+        verify { mockServerSocket.close() }
+    }
+
+    private fun initSut(context: Context = mockContext()) {
         val buildVersionProvider = createBuildVersionProvider()
-        sut = BluetoothControllerImpl(context, buildVersionProvider)
+        sut = BluetoothControllerImpl(context, buildVersionProvider, testDispatcher)
     }
 
     private fun createBuildVersionProvider(): BuildVersionProvider {
-        return mockk<BuildVersionProvider> {
+        return mockk<BuildVersionProvider>(relaxed = true) {
             every { this@mockk.isTiramisuAndAbove() } returns true
         }
     }
@@ -285,6 +411,29 @@ class BluetoothControllerTest {
         }
     }
 
+    private fun setBluetoothAdapter(
+        mockClientSocket: BluetoothSocket = mockk(relaxed = true),
+        mockServerSocket: BluetoothServerSocket = mockk(relaxed = true),
+        device: BluetoothDeviceInfo = testBluetoothDevice
+    ): BluetoothAdapter {
+        val bluetoothDevice: BluetoothDevice = mockk(relaxed = true) {
+            every {
+                createRfcommSocketToServiceRecord(UUID.fromString(SERVICE_UUID))
+            } returns mockClientSocket
+        }
+
+        return mockk(relaxed = true) {
+            every { getRemoteDevice(device.address) } returns bluetoothDevice
+            every {
+                listenUsingRfcommWithServiceRecord(
+                    "bluetooth_chat_service",
+                    UUID.fromString(SERVICE_UUID)
+                )
+            } returns mockServerSocket
+            every { getRemoteDevice(device.address) } returns bluetoothDevice
+        }
+    }
+
     private fun mockContext(
         bluetoothManager: BluetoothManager = mockk(relaxed = true),
         bluetoothAdapter: BluetoothAdapter = mockk(relaxed = true),
@@ -293,7 +442,12 @@ class BluetoothControllerTest {
         isStartDiscoverySuccessful: Boolean = true,
         slot: CapturingSlot<FoundDeviceReceiver> = slot<FoundDeviceReceiver>()
     ): Context {
-        return mockk<Context> {
+        mockkConstructor(IntentFilter::class)
+        every {
+            anyConstructed<IntentFilter>().addAction(any())
+        } returns Unit
+
+        return mockk<Context>(relaxed = true) {
             every { getSystemService(BluetoothManager::class.java) } returns bluetoothManager
             every { bluetoothManager.adapter } returns bluetoothAdapter
             every { bluetoothAdapter.bondedDevices } returns bondedDevices
@@ -302,5 +456,9 @@ class BluetoothControllerTest {
             every { checkSelfPermission(any()) } returns permission
             every { unregisterReceiver(any()) } returns Unit
         }
+    }
+
+    companion object {
+        private val testBluetoothDevice = BluetoothDeviceInfo("Name", "Address")
     }
 }

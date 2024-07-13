@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.skybit.bluetoothchat.R
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
 import dev.skybit.bluetoothchat.availableconnections.presentation.ui.components.DevicesListItem
 import dev.skybit.bluetoothchat.availableconnections.presentation.ui.components.ScanFloatingActionButton
 import dev.skybit.bluetoothchat.availableconnections.presentation.ui.components.SectionHeader
@@ -43,6 +46,7 @@ fun AvailableConnectionsScreen() {
         floatingActionButton = {
             ScanFloatingActionButton(
                 isScanning = uiState.value.isSceningDevices,
+                isEnabled = !uiState.value.isConnecting,
                 onClick = viewModel::onEvent
             )
         }
@@ -59,7 +63,9 @@ fun AvailableConnectionsScreen() {
                 }
 
                 items(uiState.value.pairedDevices) { device ->
-                    DevicesListItem(device = device)
+                    DevicesListItem(device = device, !uiState.value.isConnecting) {
+                        viewModel.onEvent(ConnectToBluetoothDevice(device))
+                    }
                 }
 
                 if (uiState.value.scannedDevices.isNotEmpty()) {
@@ -67,7 +73,30 @@ fun AvailableConnectionsScreen() {
                 }
 
                 items(uiState.value.scannedDevices) { device ->
-                    DevicesListItem(device = device)
+                    DevicesListItem(device = device, !uiState.value.isConnecting) {
+                        viewModel.onEvent(ConnectToBluetoothDevice(device))
+                    }
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopStart
+        ) {
+            if (uiState.value.isConnecting) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }

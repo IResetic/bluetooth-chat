@@ -133,6 +133,7 @@ class BluetoothControllerImpl @Inject constructor(
                     currentServerSocket?.accept()
                 } catch (e: IOException) {
                     shouldLoop = false
+                    // TODO Check what should we do here
                     null
                 }
                 emit(ConnectionResult.ConnectionEstablished)
@@ -145,7 +146,7 @@ class BluetoothControllerImpl @Inject constructor(
         }.flowOn(ioDispatcher)
     }
 
-    override fun connectToDevice(device: BluetoothDevice): Flow<ConnectionResult> {
+    override fun connectToDevice(device: BluetoothDeviceInfo): Flow<ConnectionResult> {
         return flow {
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")

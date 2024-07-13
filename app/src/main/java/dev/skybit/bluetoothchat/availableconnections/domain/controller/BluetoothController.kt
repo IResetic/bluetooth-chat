@@ -1,6 +1,5 @@
 package dev.skybit.bluetoothchat.availableconnections.domain.controller
 
-import android.bluetooth.BluetoothDevice
 import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.domain.model.ConnectionResult
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ interface BluetoothController {
 
     fun startBluetoothServer(): Flow<ConnectionResult>
 
-    fun connectToDevice(device: BluetoothDevice): Flow<ConnectionResult>
+    fun connectToDevice(device: BluetoothDeviceInfo): Flow<ConnectionResult>
 
     fun closeConnection()
 }

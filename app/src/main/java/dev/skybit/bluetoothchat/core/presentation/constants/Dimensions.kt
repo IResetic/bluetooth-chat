@@ -6,3 +6,6 @@ import androidx.compose.ui.unit.dp
 val extraSmallPadding = 4.dp
 val smallPadding = 8.dp
 val mediumPadding = 16.dp
+
+// ***** Radius ****
+val mediumRadius = 8.dp

@@ -21,22 +21,32 @@ import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
 @Composable
 fun ScanFloatingActionButton(
     isScanning: Boolean,
+    isEnabled: Boolean,
     onClick: (AvailableConnectionsScreenEvent) -> Unit
 ) {
     if (isScanning) {
-        StopFab(onClick = onClick)
+        StopFab(
+            isEnabled = isEnabled,
+            onClick = onClick
+        )
     } else {
-        ScanFab(onClick = onClick)
+        ScanFab(
+            isEnabled = isEnabled,
+            onClick = onClick
+        )
     }
 }
 
 @Composable
 fun ScanFab(
+    isEnabled: Boolean,
     onClick: (AvailableConnectionsScreenEvent) -> Unit
 ) {
     ExtendedFloatingActionButton(
         onClick = {
-            onClick(AvailableConnectionsScreenEvent.StartScanning)
+            if (isEnabled) {
+                onClick(AvailableConnectionsScreenEvent.StartScanning)
+            }
         },
         containerColor = MaterialTheme.colorScheme.inversePrimary,
         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -62,11 +72,14 @@ fun ScanFab(
 
 @Composable
 fun StopFab(
+    isEnabled: Boolean,
     onClick: (AvailableConnectionsScreenEvent) -> Unit
 ) {
     ExtendedFloatingActionButton(
         onClick = {
-            onClick(AvailableConnectionsScreenEvent.StopScanning)
+            if (isEnabled) {
+                onClick(AvailableConnectionsScreenEvent.StopScanning)
+            }
         },
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
