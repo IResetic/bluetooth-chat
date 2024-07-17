@@ -1,15 +1,16 @@
-package dev.skybit.bluetoothchat.availableconnections.presentation.ui
+package dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.domain.model.ConnectionResult
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.DisconnectFromBluetoothDevice
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.StartScanning
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent.StopScanning
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent.DisconnectFromBluetoothDevice
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent.StartScanning
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent.StopScanning
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
     private var deviceConnectionJob: Job? = null
 
     init {
+        Log.d("TEST_VIEWMODEL_INIT", "INIT VIEW MODEL")
         viewModelScope.launch {
             startScanAndPairDevicesListener()
         }
@@ -110,7 +112,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
         _state.update { it.copy(isConnecting = true) }
         deviceConnectionJob = bluetoothController
             .connectToDevice(device)
-            .listen()
+            .listen(device)
     }
 
     private fun disconnectFromDevice() {
@@ -130,7 +132,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
             .listen()
     }
 
-    private fun Flow<ConnectionResult>.listen(): Job {
+    private fun Flow<ConnectionResult>.listen(device: BluetoothDeviceInfo? = null): Job {
         return onEach { result ->
             when (result) {
                 ConnectionResult.ConnectionEstablished -> {
@@ -138,7 +140,8 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                         it.copy(
                             isConnected = true,
                             isConnecting = false,
-                            errorMessage = null
+                            errorMessage = null,
+                            startNewChat = device
                         )
                     }
                 }
@@ -147,7 +150,8 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                         it.copy(
                             isConnected = false,
                             isConnecting = false,
-                            errorMessage = result.message
+                            errorMessage = result.message,
+                            startNewChat = null
                         )
                     }
                 }
@@ -166,6 +170,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        Log.d("TEST_VIEWMODEL_INIT", "ON CLEARED")
         super.onCleared()
         bluetoothController.release()
     }

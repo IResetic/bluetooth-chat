@@ -6,6 +6,8 @@ import app.cash.turbine.test
 import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenViewModel
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

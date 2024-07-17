@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.util.Log
 import dev.skybit.bluetoothchat.availableconnections.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.availableconnections.data.recevers.FoundDeviceReceiver
@@ -111,8 +112,13 @@ class BluetoothControllerImpl @Inject constructor(
     }
 
     override fun release() {
-        context.unregisterReceiver(foundDeviceReceiver)
-        context.unregisterReceiver(bluetoothStateReceiver)
+        try {
+            context.unregisterReceiver(foundDeviceReceiver)
+            context.unregisterReceiver(bluetoothStateReceiver)
+        } catch (e: IllegalArgumentException) {
+            Log.d("BluetoothController", "Catch unregister recever")
+        }
+
         closeConnection()
     }
 
@@ -166,7 +172,7 @@ class BluetoothControllerImpl @Inject constructor(
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
-                    emit(ConnectionResult.Error("Connection was interrupted"))
+                    emit(ConnectionResult.Error("Connection was interrupted $e"))
                 }
             }
         }.onCompletion {

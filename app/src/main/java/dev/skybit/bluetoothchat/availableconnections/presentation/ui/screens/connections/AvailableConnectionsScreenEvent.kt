@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.availableconnections.presentation.ui
+package dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections
 
 import dev.skybit.bluetoothchat.availableconnections.domain.model.BluetoothDeviceInfo
 

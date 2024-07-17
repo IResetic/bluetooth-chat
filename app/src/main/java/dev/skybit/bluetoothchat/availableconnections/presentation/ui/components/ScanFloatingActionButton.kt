@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.availableconnections.presentation.ui.AvailableConnectionsScreenEvent
+import dev.skybit.bluetoothchat.availableconnections.presentation.ui.screens.connections.AvailableConnectionsScreenEvent
 import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
 
 @Composable
