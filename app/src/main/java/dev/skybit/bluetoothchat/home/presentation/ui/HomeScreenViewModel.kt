@@ -3,7 +3,7 @@ package dev.skybit.bluetoothchat.home.presentation.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.skybit.bluetoothchat.availableconnections.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
 import javax.inject.Inject
 
 @HiltViewModel
