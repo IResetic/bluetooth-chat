@@ -1,6 +1,7 @@
 package dev.skybit.bluetoothchat.chat.domain.controller
 
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,6 +25,8 @@ interface BluetoothController {
     fun startBluetoothServer(): Flow<ConnectionResult>
 
     fun connectToDevice(device: BluetoothDeviceInfo): Flow<ConnectionResult>
+
+    suspend fun trySendMessage(message: String): BluetoothMessage?
 
     fun closeConnection()
 }

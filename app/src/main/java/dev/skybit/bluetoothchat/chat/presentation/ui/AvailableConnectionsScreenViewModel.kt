@@ -1,16 +1,20 @@
-package dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections
+package dev.skybit.bluetoothchat.chat.presentation.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections.AvailableConnectionsScreenEvent.DisconnectFromBluetoothDevice
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections.AvailableConnectionsScreenEvent.StartScanning
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections.AvailableConnectionsScreenEvent.StopScanning
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.DisconnectFromBluetoothDevice
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.NavigateToDevices
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.SendMessage
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.SetInitialScreenType
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.StartIncomingConnection
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.StartScanning
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.StopScanning
+import dev.skybit.bluetoothchat.chat.presentation.ui.model.ScreenType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +40,6 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
     private var deviceConnectionJob: Job? = null
 
     init {
-        Log.d("TEST_VIEWMODEL_INIT", "INIT VIEW MODEL")
         viewModelScope.launch {
             startScanAndPairDevicesListener()
         }
@@ -53,6 +56,10 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
             is StopScanning -> stopScanning()
             is ConnectToBluetoothDevice -> connectToDevice(device = event.device)
             is DisconnectFromBluetoothDevice -> disconnectFromDevice()
+            is NavigateToDevices -> disconnectFromDevice()
+            is SetInitialScreenType -> setScreenType(event.screenType)
+            is SendMessage -> sendMessage(event.message)
+            is StartIncomingConnection -> startIncomingConnectionListener()
         }
     }
 
@@ -64,7 +71,9 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
         ) { scannedDevices, pairedDevices, state ->
             state.copy(
                 scannedDevices = scannedDevices,
-                pairedDevices = pairedDevices
+                pairedDevices = pairedDevices,
+                // TODO Check if this is needed. This is here to clear message hisory for a new connection
+                messages = if (state.isConnected) state.messages else emptyList() 
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, _state.value).collect { newState ->
             _state.update {
@@ -112,27 +121,48 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
         _state.update { it.copy(isConnecting = true) }
         deviceConnectionJob = bluetoothController
             .connectToDevice(device)
-            .listen(device)
+            .listen()
     }
 
     private fun disconnectFromDevice() {
-        // deviceConnectionJob?.cancel()
+        deviceConnectionJob?.cancel()
         bluetoothController.closeConnection()
         _state.update {
             it.copy(
                 isConnecting = false,
-                isConnected = false
+                isConnected = false,
+                screenType = ScreenType.DEVICES
             )
         }
     }
 
+    private fun setScreenType(type: ScreenType) {
+        _state.update {
+            it.copy(screenType = type)
+        }
+    }
+
+    private fun sendMessage(message: String) {
+        viewModelScope.launch {
+            val bluetoothMessage = bluetoothController.trySendMessage(message)
+
+            if (bluetoothMessage != null) {
+                _state.update { it.copy(
+                    messages = it.messages + bluetoothMessage
+                ) }
+            }
+        }
+    }
+
     private fun startIncomingConnectionListener() {
+        // _state.update { it.copy(isConnecting = true) }
         deviceConnectionJob = bluetoothController
             .startBluetoothServer()
             .listen()
     }
 
-    private fun Flow<ConnectionResult>.listen(device: BluetoothDeviceInfo? = null): Job {
+    // TODO divide to a two separate listeners one for server and one for client
+    private fun Flow<ConnectionResult>.listen(): Job {
         return onEach { result ->
             when (result) {
                 ConnectionResult.ConnectionEstablished -> {
@@ -141,7 +171,11 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                             isConnected = true,
                             isConnecting = false,
                             errorMessage = null,
-                            startNewChat = device
+                            screenType = if (it.screenType == ScreenType.DEVICES) {
+                                ScreenType.MESSAGES
+                            } else {
+                                ScreenType.DEVICES
+                            }
                         )
                     }
                 }
@@ -151,26 +185,35 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                             isConnected = false,
                             isConnecting = false,
                             errorMessage = result.message,
-                            startNewChat = null
+                            startNewChat = null,
+                            screenType = ScreenType.DEVICES
+                        )
+                    }
+                }
+
+                is ConnectionResult.TransferSucceeded -> {
+                    _state.update {
+                        it.copy(
+                            messages = it.messages + result.bluetoothMessage
                         )
                     }
                 }
             }
-        }
-            .catch { _ ->
+        }.catch { _ ->
                 bluetoothController.closeConnection()
                 _state.update {
                     it.copy(
                         isConnected = false,
-                        isConnecting = false
+                        isConnecting = false,
+                        screenType = ScreenType.DEVICES
                     )
                 }
+                startIncomingConnectionListener()
             }
             .launchIn(viewModelScope)
     }
 
     override fun onCleared() {
-        Log.d("TEST_VIEWMODEL_INIT", "ON CLEARED")
         super.onCleared()
         bluetoothController.release()
     }

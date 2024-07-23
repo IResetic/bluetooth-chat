@@ -1,7 +1,9 @@
-package dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections
+package dev.skybit.bluetoothchat.chat.presentation.ui
 
 import androidx.compose.runtime.Immutable
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.chat.presentation.ui.model.ScreenType
 
 @Immutable
 data class AvailableConnectionsUiState(
@@ -11,5 +13,7 @@ data class AvailableConnectionsUiState(
     val isConnected: Boolean = false,
     val isConnecting: Boolean = false,
     val errorMessage: String? = null,
-    val startNewChat: BluetoothDeviceInfo? = null
+    val startNewChat: BluetoothDeviceInfo? = null,
+    val screenType: ScreenType = ScreenType.DEVICES,
+    val messages: List<BluetoothMessage> = emptyList()
 )

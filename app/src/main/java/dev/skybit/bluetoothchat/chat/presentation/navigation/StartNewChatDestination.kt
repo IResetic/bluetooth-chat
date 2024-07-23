@@ -1,14 +1,35 @@
 package dev.skybit.bluetoothchat.chat.presentation.navigation
 
 import androidx.compose.animation.EnterTransition
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.availableconnections.AvailableConnectionsScreen
-import dev.skybit.bluetoothchat.chat.presentation.ui.screens.chat.ChatScreen
+import androidx.navigation.toRoute
+import dev.skybit.bluetoothchat.chat.presentation.ui.model.ScreenType
+import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreen
 import kotlinx.serialization.Serializable
 
+@Serializable
+data class StartNewChatDestination(
+    val screenType: Int
+)
+
+fun NavGraphBuilder.startNewChatGraph(
+    navigateBack: () -> Unit
+) {
+    composable<StartNewChatDestination>(
+        enterTransition = { EnterTransition.None }
+    ) {
+        val args = it.toRoute<StartNewChatDestination>()
+        AvailableConnectionsScreen(
+            screenType = ScreenType.getScreenType(args.screenType),
+            navigateBack = navigateBack
+        )
+    }
+}
+
+
+
+/*
 @Serializable
 object StartNewChatDestination {
     @Serializable
@@ -41,3 +62,4 @@ fun NavGraphBuilder.nestedScreensGraph(
         }
     }
 }
+*/

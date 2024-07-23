@@ -11,25 +11,33 @@ import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
+import com.squareup.moshi.Moshi
 import dev.skybit.bluetoothchat.chat.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.chat.data.recevers.FoundDeviceReceiver
+import dev.skybit.bluetoothchat.chat.data.service.BluetoothDataTransferService
+import dev.skybit.bluetoothchat.chat.data.service.BluetoothDataTransferServiceFactory
 import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult.TransferSucceeded
 import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,17 +48,15 @@ import javax.inject.Inject
 @SuppressLint("MissingPermission")
 class BluetoothControllerImpl @Inject constructor(
     private val context: Context,
+    private val bluetoothDataTransferServiceFactory: BluetoothDataTransferServiceFactory,
+    private val moshi: Moshi,
     buildVersionProvider: BuildVersionProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BluetoothController {
 
-    private val bluetoothManager by lazy {
-        context.getSystemService(BluetoothManager::class.java)
-    }
-
-    private val bluetoothAdapter by lazy {
-        bluetoothManager?.adapter
-    }
+    private val bluetoothManager by lazy { context.getSystemService(BluetoothManager::class.java) }
+    private val bluetoothAdapter by lazy { bluetoothManager?.adapter }
+    private var dataTransferService: BluetoothDataTransferService? = null
 
     private val _isConnected = MutableStateFlow(false)
     override val isConnected: StateFlow<Boolean>
@@ -127,7 +133,6 @@ class BluetoothControllerImpl @Inject constructor(
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
-
             currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
                 "bluetooth_chat_service",
                 UUID.fromString(SERVICE_UUID)
@@ -142,13 +147,26 @@ class BluetoothControllerImpl @Inject constructor(
                     // TODO Check what should we do here
                     null
                 }
+
+                Log.d("TEST_TRANSFER_SERVICE", "startBluetoothService")
+
                 emit(ConnectionResult.ConnectionEstablished)
-                currentClientSocket?.let {
+                currentClientSocket?.let { socket ->
                     currentServerSocket?.close()
+                    handelMessage(this, socket)
+/*                    bluetoothDataTransferServiceFactory.create(socket).also { service ->
+                        dataTransferService = service
+
+                        emitAll(
+                            service
+                                .listenForIncomingMessages()
+                                .map { TransferSucceeded(it) }
+                        )
+                    }*/
                 }
             }
         }.onCompletion {
-            closeConnection()
+            // closeConnection()
         }.flowOn(ioDispatcher)
     }
 
@@ -169,6 +187,19 @@ class BluetoothControllerImpl @Inject constructor(
                 try {
                     socket.connect()
                     emit(ConnectionResult.ConnectionEstablished)
+
+
+                    bluetoothDataTransferServiceFactory.create(socket).also { service ->
+                        dataTransferService = service
+                        Log.d("TEST_TRANSFER_SERVICE", "dataTransferService is set")
+
+                        emitAll(
+                            service
+                                .listenForIncomingMessages()
+                                .map { TransferSucceeded(it) }
+                        )
+                    }
+
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
@@ -178,6 +209,30 @@ class BluetoothControllerImpl @Inject constructor(
         }.onCompletion {
             closeConnection()
         }.flowOn(ioDispatcher)
+    }
+
+    override suspend fun trySendMessage(message: String): BluetoothMessage? {
+        if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            return null
+        }
+
+        if(dataTransferService == null) {
+            Log.d("TEST_TRANSFER_SERVICE", "data transfer service is null")
+            return null
+        }
+
+        val bluetoothMessage = BluetoothMessage(
+            id = UUID.randomUUID().toString(),
+            message = message,
+            senderName = bluetoothAdapter?.name ?: "Unknown name",
+            sendTimeAndDate = "", // TODO Get current time and date
+            isFromLocalUser = true
+        )
+
+
+        dataTransferService?.sendMessage(bluetoothMessage)
+
+        return bluetoothMessage
     }
 
     override fun closeConnection() {
@@ -227,6 +282,18 @@ class BluetoothControllerImpl @Inject constructor(
 
     private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private suspend fun handelMessage(controller: FlowCollector<ConnectionResult>, socket: BluetoothSocket) {
+        bluetoothDataTransferServiceFactory.create(socket).also { service ->
+            dataTransferService = service
+
+            controller.emitAll(
+                service
+                    .listenForIncomingMessages()
+                    .map { TransferSucceeded(it) }
+            )
+        }
     }
 
     companion object {

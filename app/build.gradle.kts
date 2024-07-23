@@ -91,4 +91,9 @@ dependencies {
     // ****** Navigation *****
     implementation(libs.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
+
+    // ****** Moshi ******
+    implementation(libs.square.moshi)
+    implementation(libs.kotlin.moshi.codegen)
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
 }

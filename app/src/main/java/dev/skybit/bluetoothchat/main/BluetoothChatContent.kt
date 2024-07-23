@@ -6,7 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import dev.skybit.bluetoothchat.chat.presentation.navigation.StartNewChatDestination
-import dev.skybit.bluetoothchat.chat.presentation.navigation.nestedScreensGraph
+import dev.skybit.bluetoothchat.chat.presentation.navigation.startNewChatGraph
+import dev.skybit.bluetoothchat.chat.presentation.ui.model.ScreenType
 import dev.skybit.bluetoothchat.home.presentation.navigation.HomeDestination
 import dev.skybit.bluetoothchat.home.presentation.navigation.chatsGraph
 
@@ -19,12 +20,15 @@ fun BluetoothChatContent(navController: NavHostController) {
             startDestination = HomeDestination
         ) {
             chatsGraph(
-                navigateToContacts = { navController.navigate(StartNewChatDestination.AvailableConnectionsDestination) }
+                navigateToContacts = {navController.navigate(StartNewChatDestination(ScreenType.DEVICES.ordinal)) }
+                //navigateToContacts = { navController.navigate(StartNewChatDestination.AvailableConnectionsDestination) }
             )
-            nestedScreensGraph(
+            startNewChatGraph(navigateBack = navController::popBackStack)
+
+ /*           nestedScreensGraph(
                 navController = navController,
                 navigateBack = navController::popBackStack
-            )
+            )*/
         }
     }
 }
