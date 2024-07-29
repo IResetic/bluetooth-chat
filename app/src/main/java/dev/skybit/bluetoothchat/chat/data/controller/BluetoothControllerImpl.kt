@@ -148,27 +148,92 @@ class BluetoothControllerImpl @Inject constructor(
                     null
                 }
 
-                Log.d("TEST_TRANSFER_SERVICE", "startBluetoothService")
-
-                emit(ConnectionResult.ConnectionEstablished)
                 currentClientSocket?.let { socket ->
                     currentServerSocket?.close()
+                    emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice?.name ?: "Unknown name"))
                     handelMessage(this, socket)
-/*                    bluetoothDataTransferServiceFactory.create(socket).also { service ->
-                        dataTransferService = service
 
-                        emitAll(
-                            service
-                                .listenForIncomingMessages()
-                                .map { TransferSucceeded(it) }
-                        )
+/*                    try {
+                        handelMessage(this, socket)
+                        bluetoothDataTransferServiceFactory.create(socket).also { service ->
+                            dataTransferService = service
+
+                            emitAll(
+                                service
+                                    .listenForIncomingMessages()
+                                    .map { TransferSucceeded(it) }
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.d("HOME_SCREEN_TEST", "HANDELING MESSAGE EXCEPTION $e")
                     }*/
+
                 }
             }
-        }.onCompletion {
-            // closeConnection()
+        }.onCompletion { error ->
+            closeConnection()
+            Log.d("HOME_SCREEN_TEST", "ON COMPLITE $error")
         }.flowOn(ioDispatcher)
     }
+
+/*    override fun startBluetoothServer(): Flow<ConnectionResult> {
+        return flow {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+                throw SecurityException("No BLUETOOTH_CONNECT permission")
+            }
+
+            Log.d("BluetoothServer", "Permission granted")
+
+            currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
+                "bluetooth_chat_service",
+                UUID.fromString(SERVICE_UUID)
+            )
+
+            if (currentServerSocket == null) {
+                Log.e("BluetoothServer", "Failed to create server socket")
+                return@flow
+            }
+
+            Log.d("BluetoothServer", "Server socket created, waiting for clients")
+
+            var shouldLoop = true
+            while (shouldLoop) {
+                currentClientSocket = try {
+                    currentServerSocket?.accept()
+                } catch (e: IOException) {
+                    Log.e("BluetoothServer", "IOException during accept()", e)
+                    shouldLoop = false
+                    null
+                }
+
+                if (currentClientSocket != null) {
+                    Log.d("BluetoothServer", "Client connected")
+                    emit(ConnectionResult.ConnectionEstablished)
+                    currentClientSocket?.let { socket ->
+                        Log.d("BluetoothServer", "Handling client socket")
+                        // Process the client socket
+                        handelMessage(this, socket) // Ensure this function is properly implemented
+                        // Optionally, close the client socket after handling
+                        try {
+                            socket.close()
+                        } catch (e: IOException) {
+                            Log.e("BluetoothServer", "IOException during socket close()", e)
+                        }
+                    }
+                } else {
+                    Log.d("BluetoothServer", "No client socket, exiting loop")
+                }
+            }
+        }.onCompletion { cause ->
+            if (cause != null) {
+                Log.e("BluetoothServer", "Flow completed with error", cause)
+            } else {
+                Log.d("BluetoothServer", "Flow completed successfully")
+            }
+            // Perform any cleanup if necessary
+            closeConnection() // Implement this method to close sockets and clean up resources
+        }.flowOn(ioDispatcher)
+    }*/
 
     override fun connectToDevice(device: BluetoothDeviceInfo): Flow<ConnectionResult> {
         return flow {
@@ -186,8 +251,7 @@ class BluetoothControllerImpl @Inject constructor(
             currentClientSocket?.let { socket ->
                 try {
                     socket.connect()
-                    emit(ConnectionResult.ConnectionEstablished)
-
+                    emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice?.name ?: "Unknown name"))
 
                     bluetoothDataTransferServiceFactory.create(socket).also { service ->
                         dataTransferService = service
@@ -211,6 +275,7 @@ class BluetoothControllerImpl @Inject constructor(
         }.flowOn(ioDispatcher)
     }
 
+    @SuppressLint("HardwareIds")
     override suspend fun trySendMessage(message: String): BluetoothMessage? {
         if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
             return null
@@ -224,6 +289,7 @@ class BluetoothControllerImpl @Inject constructor(
         val bluetoothMessage = BluetoothMessage(
             id = UUID.randomUUID().toString(),
             message = message,
+            deviceAddress = bluetoothAdapter?.address ?: UUID.randomUUID().toString(),
             senderName = bluetoothAdapter?.name ?: "Unknown name",
             sendTimeAndDate = "", // TODO Get current time and date
             isFromLocalUser = true
@@ -233,6 +299,11 @@ class BluetoothControllerImpl @Inject constructor(
         dataTransferService?.sendMessage(bluetoothMessage)
 
         return bluetoothMessage
+    }
+
+    override fun closeServerConnection() {
+        currentServerSocket?.close()
+        currentServerSocket = null
     }
 
     override fun closeConnection() {

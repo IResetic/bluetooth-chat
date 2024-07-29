@@ -47,7 +47,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
         initBluetoothConnectionStatus()
         handleBluetoothConnectionErrors()
 
-        startIncomingConnectionListener()
+        // startIncomingConnectionListener()
     }
 
     fun onEvent(event: AvailableConnectionsScreenEvent) {
@@ -147,9 +147,11 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
             val bluetoothMessage = bluetoothController.trySendMessage(message)
 
             if (bluetoothMessage != null) {
-                _state.update { it.copy(
-                    messages = it.messages + bluetoothMessage
-                ) }
+                _state.update {
+                    it.copy(
+                        messages = it.messages + bluetoothMessage
+                    )
+                }
             }
         }
     }
@@ -165,7 +167,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
     private fun Flow<ConnectionResult>.listen(): Job {
         return onEach { result ->
             when (result) {
-                ConnectionResult.ConnectionEstablished -> {
+                is ConnectionResult.ConnectionEstablished -> {
                     _state.update {
                         it.copy(
                             isConnected = true,
@@ -208,7 +210,7 @@ class AvailableConnectionsScreenViewModel @Inject constructor(
                         screenType = ScreenType.DEVICES
                     )
                 }
-                startIncomingConnectionListener()
+                // startIncomingConnectionListener()
             }
             .launchIn(viewModelScope)
     }

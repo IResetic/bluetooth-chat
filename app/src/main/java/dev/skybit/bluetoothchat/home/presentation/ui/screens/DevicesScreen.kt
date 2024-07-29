@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.presentation.ui.screens
+package dev.skybit.bluetoothchat.home.presentation.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import dev.skybit.bluetoothchat.R
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.presentation.ui.components.SectionHeader
+import dev.skybit.bluetoothchat.home.presentation.ui.components.ConnectionErrorDialog
 import dev.skybit.bluetoothchat.home.presentation.ui.components.DevicesListItem
 
 @Composable
@@ -21,6 +22,8 @@ fun DevicesScreen(
     pairedDevices: List<BluetoothDeviceInfo>,
     scannedDevices: List<BluetoothDeviceInfo>,
     isConnecting: Boolean = false,
+    errorMessage: String? = null,
+    onErrorHandler: () -> Unit,
     connectToDevice: (BluetoothDeviceInfo) -> Unit
 ) {
     LazyColumn {
@@ -62,6 +65,12 @@ fun DevicesScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
+        }
+
+        if (errorMessage != null) {
+            ConnectionErrorDialog(
+                onDismissRequest = onErrorHandler
+            )
         }
     }
 }
