@@ -1,8 +1,8 @@
-package dev.skybit.bluetoothchat.chat.data.mappers
+package dev.skybit.bluetoothchat.home.data.mappers
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 
 @SuppressLint("MissingPermission")
 fun BluetoothDevice.toBluetoothDeviceInfo(): BluetoothDeviceInfo {

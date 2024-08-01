@@ -1,11 +1,11 @@
-package dev.skybit.bluetoothchat.chat.data.service
+package dev.skybit.bluetoothchat.home.data.service
 
 import android.bluetooth.BluetoothSocket
 import com.squareup.moshi.Moshi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import dev.skybit.bluetoothchat.chat.data.model.BluetoothMessageDto
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.data.model.BluetoothMessageDto
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow

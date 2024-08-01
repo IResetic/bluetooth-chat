@@ -3,9 +3,10 @@ package dev.skybit.bluetoothchat.home.presentation.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ConnectToBluetoothDevice
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ErrorConnectingToDevice
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.NavigateBackToHomeScreen
@@ -13,6 +14,7 @@ import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.NavigateToD
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ScanForDevices
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.SendMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.SetConnectionAvailability
+import dev.skybit.bluetoothchat.home.presentation.ui.model.ChatsListUiItem
 import dev.skybit.bluetoothchat.home.presentation.ui.model.ScreenType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -32,16 +34,12 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val bluetoothController: BluetoothController
-) : ViewModel() {
+) : ViewModel(){
 
     private var deviceConnectionJob: Job? = null
     private var devicesScanneingJob: Job? = null
     private val _state = MutableStateFlow(HomeScreenUiState())
     val state: StateFlow<HomeScreenUiState> = _state.asStateFlow()
-    /*
-        private val _state = MutableStateFlow(AvailableConnectionsUiState())
-    val state: StateFlow<AvailableConnectionsUiState> = _state.asStateFlow()
-     */
 
     override fun onCleared() {
         super.onCleared()
@@ -50,9 +48,7 @@ class HomeScreenViewModel @Inject constructor(
 
     fun onEvent(event: HomeScreenEvent) {
         when (event) {
-            is SetConnectionAvailability -> {
-                setConnectionAvailability(event.isAvailable)
-            }
+            is SetConnectionAvailability -> setConnectionAvailability(event.isAvailable)
 
             is NavigateToDevicesScreen -> {
                 setCurrentScreenType(ScreenType.DevicesScreenType)
@@ -66,21 +62,13 @@ class HomeScreenViewModel @Inject constructor(
                 setCurrentScreenType(ScreenType.HomeScreenType)
             }
 
-            is SendMessage -> {
-                sendMessage(event.message)
-            }
+            is SendMessage -> sendMessage(event.message)
 
-            is ConnectToBluetoothDevice -> {
-                connectToDevice(event.device)
-            }
+            is ConnectToBluetoothDevice -> connectToDevice(event.device)
 
-            is ScanForDevices -> {
-                if (event.isScanning) stopScanning() else startScanning()
-            }
+            is ScanForDevices -> if (event.isScanning) stopScanning() else startScanning()
 
-            is ErrorConnectingToDevice -> {
-                stopConnectingToDevice()
-            }
+            is ErrorConnectingToDevice -> stopConnectingToDevice()
 
             is HomeScreenEvent.ChatError -> {
                 _state.update {
@@ -100,7 +88,6 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    // TODO Maybe move everything that has to do with scanning to a delegate
     private fun startScanAndPairDevicesListener() {
         devicesScanneingJob = viewModelScope.launch {
             combine(
@@ -152,11 +139,9 @@ class HomeScreenViewModel @Inject constructor(
         }
         deviceConnectionJob?.cancel()
         deviceConnectionJob = null
-
     }
 
 
-/*
     private fun updateChats(bluetoothMessage: BluetoothMessage): Map<String, ChatsListUiItem> {
         val map = _state.value.chatsMap.toMutableMap()
         map[bluetoothMessage.deviceAddress] = ChatsListUiItem(
@@ -166,34 +151,13 @@ class HomeScreenViewModel @Inject constructor(
 
         return map
     }
-*/
-
-/*
-    private fun updateChats(bluetoothMessage: BluetoothMessage): Map<String, String> {
-        val map = _state.value.chatsMap.toMutableMap()
-        map[bluetoothMessage.senderName] = bluetoothMessage.message
-
-        return map
-    }
-*/
-
 
     private fun startScanning() {
         bluetoothController.startDiscovery()
-        setScanningStatus(true)
     }
 
     private fun stopScanning() {
         bluetoothController.stopDiscovery()
-        setScanningStatus(false)
-    }
-
-    private fun setScanningStatus(isScanning: Boolean) {
-        _state.update { currentState ->
-            currentState.copy(
-                isSceningDevices = isScanning
-            )
-        }
     }
 
     private fun setConnectionAvailability(isAvailable: Boolean) {
@@ -217,7 +181,8 @@ class HomeScreenViewModel @Inject constructor(
             if (bluetoothMessage != null) {
                 _state.update {
                     it.copy(
-                        messages = it.messages + bluetoothMessage
+                        messages = it.messages + bluetoothMessage,
+                        // chatsMap = updateChats(bluetoothMessage)
                     )
                 }
             }
@@ -231,7 +196,7 @@ class HomeScreenViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             currentScreen = ScreenType.ChatScreenType(deviceName = result.senderName),
-                            // isAvailableForConnection = false,
+                            isAvailableForConnection = false,
                             isConnectionChannelClosed = false
                         )
                     }
@@ -251,6 +216,7 @@ class HomeScreenViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             messages = it.messages + result.bluetoothMessage,
+                            // chatsMap = updateChats(result.bluetoothMessage)
                         )
                     }
                 }

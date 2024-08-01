@@ -1,8 +1,8 @@
-package dev.skybit.bluetoothchat.chat.domain.controller
+package dev.skybit.bluetoothchat.home.domain.controller
 
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
-import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -29,11 +29,13 @@ fun HomeScreenTopAppBar(
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-            IconButton(onClick = { navigateBack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Navigate back"
-                )
+            if(screenType !is ScreenType.HomeScreenType) {
+                IconButton(onClick = { navigateBack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back"
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors().copy(

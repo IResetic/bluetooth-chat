@@ -14,7 +14,7 @@ import app.cash.turbine.test
 import dev.skybit.bluetoothchat.chat.data.controller.BluetoothControllerImpl.Companion.SERVICE_UUID
 import dev.skybit.bluetoothchat.chat.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.data.recevers.FoundDeviceReceiver
-import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider

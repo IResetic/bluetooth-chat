@@ -1,8 +1,8 @@
 package dev.skybit.bluetoothchat.chat.presentation.ui
 
 import androidx.compose.runtime.Immutable
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.chat.presentation.ui.model.ScreenType
 
 @Immutable

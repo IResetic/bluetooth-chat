@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chat.presentation.ui.components.SectionHeader
 import dev.skybit.bluetoothchat.home.presentation.ui.components.DevicesListItem
 

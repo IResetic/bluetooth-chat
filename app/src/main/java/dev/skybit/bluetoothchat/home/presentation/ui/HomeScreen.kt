@@ -3,6 +3,8 @@ package dev.skybit.bluetoothchat.home.presentation.ui
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -23,6 +25,7 @@ import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.SendMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.SetConnectionAvailability
 import dev.skybit.bluetoothchat.home.presentation.ui.components.AvailabilitySwitch
 import dev.skybit.bluetoothchat.home.presentation.ui.components.HomeScreenTopAppBar
+import dev.skybit.bluetoothchat.home.presentation.ui.components.MessageListItem
 import dev.skybit.bluetoothchat.home.presentation.ui.components.ScanDevicesFloatingActionButton
 import dev.skybit.bluetoothchat.home.presentation.ui.model.ScreenType
 import dev.skybit.bluetoothchat.home.presentation.ui.model.ScreenType.ChatScreenType
@@ -38,25 +41,12 @@ fun HomeScreen() {
 
     Scaffold(
         topBar = {
-                 HomeScreenTopAppBar(
-                     screenType = uiState.currentScreen,
-                     navigateBack = {
-/*                         if (uiState.currentScreen is ChatScreenType) {
-                             viewModel.onEvent(QuiteCurrentChat)
-                         }
-
-                         if (uiState.currentScreen is DevicesScreenType) {
-                             viewModel.onEvent(QuiteCurrentChat)
-                         }*/
-                         viewModel.onEvent(NavigateBackToHomeScreen)
-                     }
-                 )
-/*            TopAppBar(
-                title = { Text("Chats") },
-                colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = MaterialTheme.colorScheme.inversePrimary
-                )
-            )*/
+            HomeScreenTopAppBar(
+                screenType = uiState.currentScreen,
+                navigateBack = {
+                    viewModel.onEvent(NavigateBackToHomeScreen)
+                }
+            )
         },
         floatingActionButton = {
             if (uiState.currentScreen == ScreenType.HomeScreenType) {
@@ -88,10 +78,20 @@ fun HomeScreen() {
 
             when(uiState.currentScreen) {
                 is ScreenType.HomeScreenType -> {
-                    AvailabilitySwitch(
-                        isConnectionAvailable = uiState.isAvailableForConnection,
-                        changeAvailability = { viewModel.onEvent(SetConnectionAvailability(it)) }
-                    )
+                    LazyColumn {
+                        item {
+                            AvailabilitySwitch(
+                                isConnectionAvailable = uiState.isAvailableForConnection,
+                                changeAvailability = { viewModel.onEvent(SetConnectionAvailability(it)) }
+                            )
+                        }
+
+                        items(uiState.chatsMap.keys.toList()) { deviceAddress ->
+                            uiState.chatsMap[deviceAddress]?.let { message ->
+                                MessageListItem(name = message.name, message = message.lastMessage)
+                            }
+                        }
+                    }
                 }
 
                 is ChatScreenType -> {

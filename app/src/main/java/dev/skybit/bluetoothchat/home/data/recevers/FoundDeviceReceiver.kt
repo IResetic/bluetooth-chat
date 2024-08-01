@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.data.recevers
+package dev.skybit.bluetoothchat.home.data.recevers
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

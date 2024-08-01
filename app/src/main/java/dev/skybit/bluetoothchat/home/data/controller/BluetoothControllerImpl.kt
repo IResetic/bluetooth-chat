@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.data.controller
+package dev.skybit.bluetoothchat.home.data.controller
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,16 +12,16 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
 import com.squareup.moshi.Moshi
-import dev.skybit.bluetoothchat.chat.data.mappers.toBluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.data.recevers.BluetoothStateReceiver
-import dev.skybit.bluetoothchat.chat.data.recevers.FoundDeviceReceiver
-import dev.skybit.bluetoothchat.chat.data.service.BluetoothDataTransferService
-import dev.skybit.bluetoothchat.chat.data.service.BluetoothDataTransferServiceFactory
-import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
-import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
-import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult.TransferSucceeded
+import dev.skybit.bluetoothchat.home.data.mappers.toBluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.data.recevers.BluetoothStateReceiver
+import dev.skybit.bluetoothchat.home.data.recevers.FoundDeviceReceiver
+import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferService
+import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferServiceFactory
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult.TransferSucceeded
 import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.CoroutineDispatcher
@@ -152,22 +152,6 @@ class BluetoothControllerImpl @Inject constructor(
                     currentServerSocket?.close()
                     emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice?.name ?: "Unknown name"))
                     handelMessage(this, socket)
-
-/*                    try {
-                        handelMessage(this, socket)
-                        bluetoothDataTransferServiceFactory.create(socket).also { service ->
-                            dataTransferService = service
-
-                            emitAll(
-                                service
-                                    .listenForIncomingMessages()
-                                    .map { TransferSucceeded(it) }
-                            )
-                        }
-                    } catch (e: Exception) {
-                        Log.d("HOME_SCREEN_TEST", "HANDELING MESSAGE EXCEPTION $e")
-                    }*/
-
                 }
             }
         }.onCompletion { error ->

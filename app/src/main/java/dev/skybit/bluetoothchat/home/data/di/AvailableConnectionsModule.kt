@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.data.di
+package dev.skybit.bluetoothchat.home.data.di
 
 import android.content.Context
 import dagger.Binds
@@ -7,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dev.skybit.bluetoothchat.chat.data.controller.BluetoothControllerImpl
-import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.data.controller.BluetoothControllerImpl
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import javax.inject.Singleton
 
 @Module

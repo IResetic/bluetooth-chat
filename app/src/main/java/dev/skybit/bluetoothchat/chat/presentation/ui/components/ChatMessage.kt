@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 
 @Composable
 fun ChatMessage(

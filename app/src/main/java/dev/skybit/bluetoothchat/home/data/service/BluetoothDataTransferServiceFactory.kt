@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.data.service
+package dev.skybit.bluetoothchat.home.data.service
 
 import android.bluetooth.BluetoothSocket
 import dagger.assisted.AssistedFactory

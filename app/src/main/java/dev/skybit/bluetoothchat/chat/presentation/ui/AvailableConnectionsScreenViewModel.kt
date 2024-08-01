@@ -3,9 +3,9 @@ package dev.skybit.bluetoothchat.chat.presentation.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.skybit.bluetoothchat.chat.domain.controller.BluetoothController
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chat.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.ConnectToBluetoothDevice
 import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.DisconnectFromBluetoothDevice
 import dev.skybit.bluetoothchat.chat.presentation.ui.AvailableConnectionsScreenEvent.NavigateToDevices

@@ -1,7 +1,7 @@
-package dev.skybit.bluetoothchat.chat.data.model
+package dev.skybit.bluetoothchat.home.data.model
 
 import com.squareup.moshi.JsonClass
-import dev.skybit.bluetoothchat.chat.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 
 @JsonClass(generateAdapter = true)
 data class BluetoothMessageDto(

@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.domain.model
+package dev.skybit.bluetoothchat.home.domain.model
 
 data class BluetoothDeviceInfo(
     val name: String?,
