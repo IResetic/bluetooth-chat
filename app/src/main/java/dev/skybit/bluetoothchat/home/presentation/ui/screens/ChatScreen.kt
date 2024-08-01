@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
-import dev.skybit.bluetoothchat.chat.presentation.ui.components.ChatMessage
+import dev.skybit.bluetoothchat.home.presentation.ui.components.ChatMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.components.ConnectionErrorDialog
 
 @Composable
@@ -62,7 +62,7 @@ fun ChatScreen(
                         message = message,
                         modifier = Modifier
                             .align(
-                                if(message.isFromLocalUser) Alignment.End else Alignment.Start
+                                if (message.isFromLocalUser) Alignment.End else Alignment.Start
                             )
                     )
                 }
@@ -89,7 +89,7 @@ fun ChatScreen(
                     message.value = ""
                     keyboardController?.hide()
                 },
-                enabled = isConnectionAlive.value,
+                enabled = isConnectionAlive.value
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Send,

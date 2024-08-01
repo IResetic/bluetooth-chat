@@ -67,16 +67,7 @@ fun HomeScreen() {
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-
-/*            LazyColumn {
-                items(uiState.value.chatsMap.keys.toList()) { deviceAddress ->
-                    uiState.value.chatsMap[deviceAddress]?.let { message ->
-                        MessageListItem(name = message.name, message = message.lastMessage)
-                    }
-                }
-            }*/
-
-            when(uiState.currentScreen) {
+            when (uiState.currentScreen) {
                 is ScreenType.HomeScreenType -> {
                     LazyColumn {
                         item {

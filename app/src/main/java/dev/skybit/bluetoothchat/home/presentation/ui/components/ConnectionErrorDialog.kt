@@ -12,7 +12,7 @@ fun ConnectionErrorDialog(
 ) {
     AlertDialog(
         onDismissRequest = {
-           onDismissRequest()
+            onDismissRequest()
         },
         // 5
         title = { Text(text = "Connection error") },
@@ -31,39 +31,3 @@ fun ConnectionErrorDialog(
         }
     )
 }
-
-/*
-
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Example Icon")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
- */

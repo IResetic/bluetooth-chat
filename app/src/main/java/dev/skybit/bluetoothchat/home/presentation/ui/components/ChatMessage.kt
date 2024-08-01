@@ -1,4 +1,4 @@
-package dev.skybit.bluetoothchat.chat.presentation.ui.components
+package dev.skybit.bluetoothchat.home.presentation.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

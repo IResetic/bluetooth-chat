@@ -12,6 +12,8 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
 import com.squareup.moshi.Moshi
+import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
+import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import dev.skybit.bluetoothchat.home.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.home.data.recevers.FoundDeviceReceiver
@@ -22,8 +24,6 @@ import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult.TransferSucceeded
-import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
-import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -247,7 +247,6 @@ class BluetoothControllerImpl @Inject constructor(
                                 .map { TransferSucceeded(it) }
                         )
                     }
-
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
@@ -261,11 +260,11 @@ class BluetoothControllerImpl @Inject constructor(
 
     @SuppressLint("HardwareIds")
     override suspend fun trySendMessage(message: String): BluetoothMessage? {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
             return null
         }
 
-        if(dataTransferService == null) {
+        if (dataTransferService == null) {
             Log.d("TEST_TRANSFER_SERVICE", "data transfer service is null")
             return null
         }
@@ -278,7 +277,6 @@ class BluetoothControllerImpl @Inject constructor(
             sendTimeAndDate = "", // TODO Get current time and date
             isFromLocalUser = true
         )
-
 
         dataTransferService?.sendMessage(bluetoothMessage)
 

@@ -34,8 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val bluetoothController: BluetoothController
-) : ViewModel(){
-
+) : ViewModel() {
     private var deviceConnectionJob: Job? = null
     private var devicesScanneingJob: Job? = null
     private val _state = MutableStateFlow(HomeScreenUiState())
@@ -97,7 +96,7 @@ class HomeScreenViewModel @Inject constructor(
             ) { scannedDevices, pairedDevices, state ->
                 state.copy(
                     scannedDevices = scannedDevices,
-                    pairedDevices = pairedDevices,
+                    pairedDevices = pairedDevices
                     // TODO Check if this is needed. This is here to clear message hisory for a new connection
                     // messages = if (state.isConnectedWithOtherDevice) state. else emptyList()
                 )
@@ -134,13 +133,12 @@ class HomeScreenViewModel @Inject constructor(
         _state.update {
             it.copy(
                 isConnecting = false,
-                errorMessage = null,
+                errorMessage = null
             )
         }
         deviceConnectionJob?.cancel()
         deviceConnectionJob = null
     }
-
 
     private fun updateChats(bluetoothMessage: BluetoothMessage): Map<String, ChatsListUiItem> {
         val map = _state.value.chatsMap.toMutableMap()
@@ -181,7 +179,7 @@ class HomeScreenViewModel @Inject constructor(
             if (bluetoothMessage != null) {
                 _state.update {
                     it.copy(
-                        messages = it.messages + bluetoothMessage,
+                        messages = it.messages + bluetoothMessage
                         // chatsMap = updateChats(bluetoothMessage)
                     )
                 }
@@ -215,7 +213,7 @@ class HomeScreenViewModel @Inject constructor(
                 is ConnectionResult.TransferSucceeded -> {
                     _state.update {
                         it.copy(
-                            messages = it.messages + result.bluetoothMessage,
+                            messages = it.messages + result.bluetoothMessage
                             // chatsMap = updateChats(result.bluetoothMessage)
                         )
                     }
@@ -227,7 +225,7 @@ class HomeScreenViewModel @Inject constructor(
                 it.copy(
                     isAvailableForConnection = false,
                     isConnecting = false,
-                    isConnectionChannelClosed = true,
+                    isConnectionChannelClosed = true
                 )
             }
         }.launchIn(viewModelScope)

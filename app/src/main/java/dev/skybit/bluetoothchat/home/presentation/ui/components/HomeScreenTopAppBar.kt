@@ -19,8 +19,7 @@ fun HomeScreenTopAppBar(
     screenType: ScreenType,
     navigateBack: () -> Unit
 ) {
-
-    val title = when(screenType) {
+    val title = when (screenType) {
         is ScreenType.HomeScreenType -> "Chats"
         is ScreenType.DevicesScreenType -> "Bluetooth Connections"
         is ScreenType.ChatScreenType -> screenType.deviceName
@@ -29,7 +28,7 @@ fun HomeScreenTopAppBar(
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-            if(screenType !is ScreenType.HomeScreenType) {
+            if (screenType !is ScreenType.HomeScreenType) {
                 IconButton(onClick = { navigateBack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -40,6 +39,6 @@ fun HomeScreenTopAppBar(
         },
         colors = TopAppBarDefaults.topAppBarColors().copy(
             containerColor = MaterialTheme.colorScheme.inversePrimary
-        ),
+        )
     )
 }

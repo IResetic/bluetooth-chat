@@ -16,21 +16,7 @@ fun BluetoothChatContent(navController: NavHostController) {
             navController = navController,
             startDestination = HomeDestination
         ) {
-            chatsGraph(
-                navigateBack = navController::popBackStack
-            )
-
-
-/*            chatsGraph(
-                navigateToContacts = {navController.navigate(StartNewChatDestination(ScreenType.DEVICES.ordinal)) }
-                //navigateToContacts = { navController.navigate(StartNewChatDestination.AvailableConnectionsDestination) }
-            )
-            startNewChatGraph(navigateBack = navController::popBackStack)*/
-
- /*           nestedScreensGraph(
-                navController = navController,
-                navigateBack = navController::popBackStack
-            )*/
+            chatsGraph()
         }
     }
 }
