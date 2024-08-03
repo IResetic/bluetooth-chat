@@ -31,7 +31,11 @@ fun ChatMessage(
                 )
             )
             .background(
-                if (message.isFromLocalUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                if (message.isFromLocalUser) {
+                    MaterialTheme.colorScheme.tertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primaryContainer
+                }
             )
             .padding(16.dp)
     ) {

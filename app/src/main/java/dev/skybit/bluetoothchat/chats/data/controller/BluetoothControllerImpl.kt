@@ -12,8 +12,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
 import com.squareup.moshi.Moshi
-import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
-import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import dev.skybit.bluetoothchat.chats.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chats.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.chats.data.recevers.FoundDeviceReceiver
@@ -24,6 +22,8 @@ import dev.skybit.bluetoothchat.chats.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.chats.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.chats.domain.model.ConnectionResult.TransferSucceeded
+import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
+import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

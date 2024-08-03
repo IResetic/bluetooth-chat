@@ -1,7 +1,13 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package dev.skybit.bluetoothchat.chats.presentation.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -65,7 +71,11 @@ fun HomeScreen() {
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .imePadding()
         ) {
             when (uiState.currentScreen) {
                 is ScreenType.HomeScreenType -> {
@@ -105,12 +115,6 @@ fun HomeScreen() {
                     )
                 }
             }
-
-/*            if (uiState.errorMessage != null) {
-                ConnectionErrorDialog {
-                    viewModel.onEvent(ErrorConnectingToDevice)
-                }
-            }*/
         }
     }
 }

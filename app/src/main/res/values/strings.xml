@@ -7,4 +7,9 @@
     <string name="unknown_connection_name">Unknown</string>
     <string name="pair_devices_header">Paired devices</string>
     <string name="available_devices_header">Available devices</string>
+
+    <!-- Chat screen -->
+    <string name="chat_message_placeholder">Enter text</string>
+    <string name="enter_text_message_placeholder">Please enter the message"</string>
+
 </resources>

@@ -9,3 +9,6 @@ val mediumPadding = 16.dp
 
 // ***** Radius ****
 val mediumRadius = 8.dp
+
+// ***** Elevation *****
+val smallElevation = 8.dp

@@ -1,5 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package dev.skybit.bluetoothchat.chats.presentation.ui.screens
 
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,22 +14,41 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dev.skybit.bluetoothchat.R
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.chats.presentation.ui.components.ChatMessage
 import dev.skybit.bluetoothchat.chats.presentation.ui.components.ConnectionErrorDialog
+import dev.skybit.bluetoothchat.core.presentation.constants.smallElevation
+import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -33,21 +57,32 @@ fun ChatScreen(
     onErrorHandler: () -> Unit,
     onSendMessage: (String) -> Unit
 ) {
-    val message = rememberSaveable {
-        mutableStateOf("")
-    }
+    val message = rememberSaveable { mutableStateOf("") }
+    val isConnectionAlive = rememberSaveable { mutableStateOf(true) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    val isConnectionAlive = rememberSaveable {
-        mutableStateOf(true)
-    }
+    LaunchedEffect(key1 = messages.size) {
+        val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+        val isLocalUser = messages.lastOrNull()?.isFromLocalUser
 
-    val keyboardController = LocalSoftwareKeyboardController.current
+        if (isLocalUser == false) {
+            if (messages.size - 1 - lastVisible > 1) {
+                Toast.makeText(context, "New message received", Toast.LENGTH_SHORT).show()
+            } else {
+                listState.animateScrollToItem(messages.size - 1)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
@@ -68,33 +103,79 @@ fun ChatScreen(
                 }
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+
+        Surface(
+            shadowElevation = smallElevation
         ) {
-            TextField(
-                enabled = isConnectionAlive.value,
-                value = message.value,
-                onValueChange = { message.value = it },
-                modifier = Modifier.weight(1f),
-                placeholder = {
-                    Text(text = "Message")
-                }
-            )
-            IconButton(
-                onClick = {
-                    onSendMessage(message.value)
-                    message.value = ""
-                    keyboardController?.hide()
-                },
-                enabled = isConnectionAlive.value
+            Row(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .fillMaxWidth()
+                    .padding(smallPadding),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Send message"
-                )
+                BasicTextField(
+                    modifier = Modifier
+                        .weight(5f)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.onPrimary),
+
+                    value = message.value,
+                    onValueChange = { message.value = it },
+                    enabled = true,
+                    textStyle = TextStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 16.sp,
+                        textDecoration = TextDecoration.None
+                    )
+                ) {
+                    OutlinedTextFieldDefaults.DecorationBox(
+                        value = message.value,
+                        innerTextField = it,
+                        singleLine = false,
+                        enabled = true,
+                        contentPadding = PaddingValues(10.dp),
+                        placeholder = {
+                            Text(
+                                stringResource(id = R.string.chat_message_placeholder),
+                                fontSize = 16.sp
+                            )
+                        },
+                        visualTransformation = VisualTransformation.None,
+                        interactionSource = interactionSource,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            focusedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            disabledBorderColor = Color.Transparent,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent
+                        )
+                    )
+                }
+
+                IconButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        scope.launch {
+                            onSendMessage(message.value)
+                            message.value = ""
+                            listState.animateScrollToItem(if (messages.isEmpty()) 0 else messages.size - 1)
+                        }
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .padding(smallPadding),
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        // contentDescription = stringResource(id = R.string.send_message_button_content_description),
+                        contentDescription = "Send message",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     }

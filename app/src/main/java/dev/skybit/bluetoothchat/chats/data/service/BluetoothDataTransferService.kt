@@ -4,9 +4,9 @@ import android.bluetooth.BluetoothSocket
 import com.squareup.moshi.Moshi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import dev.skybit.bluetoothchat.chats.data.model.BluetoothMessageDto
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
