@@ -11,4 +11,5 @@ sealed interface HomeScreenEvent {
     data class ScanForDevices(val isScanning: Boolean) : HomeScreenEvent
     data object ErrorConnectingToDevice : HomeScreenEvent
     data object ChatError : HomeScreenEvent
+    data class StartChat(val chatId: String) : HomeScreenEvent
 }

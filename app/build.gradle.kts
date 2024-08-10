@@ -95,5 +95,18 @@ dependencies {
     // ****** Moshi ******
     implementation(libs.square.moshi)
     implementation(libs.kotlin.moshi.codegen)
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    implementation(libs.moshi.kotlin)
+
+    // ***** Room *****
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+
+    // ***** Paging *****
+    implementation(libs.paging.compose)
+    implementation(libs.paging.runtime)
+    testImplementation(libs.paging.common)
+    testImplementation(libs.paging.testing)
 }

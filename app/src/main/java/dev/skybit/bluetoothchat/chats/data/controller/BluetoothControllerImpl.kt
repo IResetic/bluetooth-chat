@@ -11,7 +11,14 @@ import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
-import com.squareup.moshi.Moshi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
+import dev.skybit.bluetoothchat.chats.data.db.dao.ChatDao
+import dev.skybit.bluetoothchat.chats.data.db.dao.MessagesDao
+import dev.skybit.bluetoothchat.chats.data.db.model.ChatEntity
+import dev.skybit.bluetoothchat.chats.data.db.model.MessageEntity
 import dev.skybit.bluetoothchat.chats.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chats.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.chats.data.recevers.FoundDeviceReceiver
@@ -41,6 +48,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
@@ -49,7 +57,8 @@ import javax.inject.Inject
 class BluetoothControllerImpl @Inject constructor(
     private val context: Context,
     private val bluetoothDataTransferServiceFactory: BluetoothDataTransferServiceFactory,
-    private val moshi: Moshi,
+    private val chatDao: ChatDao,
+    private val messagesDao: MessagesDao,
     buildVersionProvider: BuildVersionProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BluetoothController {
@@ -150,7 +159,16 @@ class BluetoothControllerImpl @Inject constructor(
 
                 currentClientSocket?.let { socket ->
                     currentServerSocket?.close()
-                    emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice?.name ?: "Unknown name"))
+
+                    createNewChat(socket)
+
+                    emit(
+                        ConnectionResult.ConnectionEstablished(
+                            socket.remoteDevice?.name ?: "Unknown name",
+                            chatId = socket.remoteDevice.address
+                            // chatId = androidId
+                        )
+                    )
                     handelMessage(this, socket)
                 }
             }
@@ -159,65 +177,6 @@ class BluetoothControllerImpl @Inject constructor(
             Log.d("HOME_SCREEN_TEST", "ON COMPLITE $error")
         }.flowOn(ioDispatcher)
     }
-
-/*    override fun startBluetoothServer(): Flow<ConnectionResult> {
-        return flow {
-            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
-                throw SecurityException("No BLUETOOTH_CONNECT permission")
-            }
-
-            Log.d("BluetoothServer", "Permission granted")
-
-            currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
-                "bluetooth_chat_service",
-                UUID.fromString(SERVICE_UUID)
-            )
-
-            if (currentServerSocket == null) {
-                Log.e("BluetoothServer", "Failed to create server socket")
-                return@flow
-            }
-
-            Log.d("BluetoothServer", "Server socket created, waiting for clients")
-
-            var shouldLoop = true
-            while (shouldLoop) {
-                currentClientSocket = try {
-                    currentServerSocket?.accept()
-                } catch (e: IOException) {
-                    Log.e("BluetoothServer", "IOException during accept()", e)
-                    shouldLoop = false
-                    null
-                }
-
-                if (currentClientSocket != null) {
-                    Log.d("BluetoothServer", "Client connected")
-                    emit(ConnectionResult.ConnectionEstablished)
-                    currentClientSocket?.let { socket ->
-                        Log.d("BluetoothServer", "Handling client socket")
-                        // Process the client socket
-                        handelMessage(this, socket) // Ensure this function is properly implemented
-                        // Optionally, close the client socket after handling
-                        try {
-                            socket.close()
-                        } catch (e: IOException) {
-                            Log.e("BluetoothServer", "IOException during socket close()", e)
-                        }
-                    }
-                } else {
-                    Log.d("BluetoothServer", "No client socket, exiting loop")
-                }
-            }
-        }.onCompletion { cause ->
-            if (cause != null) {
-                Log.e("BluetoothServer", "Flow completed with error", cause)
-            } else {
-                Log.d("BluetoothServer", "Flow completed successfully")
-            }
-            // Perform any cleanup if necessary
-            closeConnection() // Implement this method to close sockets and clean up resources
-        }.flowOn(ioDispatcher)
-    }*/
 
     override fun connectToDevice(device: BluetoothDeviceInfo): Flow<ConnectionResult> {
         return flow {
@@ -235,18 +194,17 @@ class BluetoothControllerImpl @Inject constructor(
             currentClientSocket?.let { socket ->
                 try {
                     socket.connect()
-                    emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice?.name ?: "Unknown name"))
+                    createNewChat(socket)
 
-                    bluetoothDataTransferServiceFactory.create(socket).also { service ->
-                        dataTransferService = service
-                        Log.d("TEST_TRANSFER_SERVICE", "dataTransferService is set")
-
-                        emitAll(
-                            service
-                                .listenForIncomingMessages()
-                                .map { TransferSucceeded(it) }
+                    emit(
+                        ConnectionResult.ConnectionEstablished(
+                            socket.remoteDevice?.name ?: "Unknown name",
+                            chatId = socket.remoteDevice.address
+                            // chatId = androidId
                         )
-                    }
+                    )
+
+                    handelMessage(this, socket)
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
@@ -272,15 +230,38 @@ class BluetoothControllerImpl @Inject constructor(
         val bluetoothMessage = BluetoothMessage(
             id = UUID.randomUUID().toString(),
             message = message,
-            deviceAddress = bluetoothAdapter?.address ?: UUID.randomUUID().toString(),
+            deviceAddress = currentClientSocket?.remoteDevice?.address ?: "Unknown address",
             senderName = bluetoothAdapter?.name ?: "Unknown name",
-            sendTimeAndDate = "", // TODO Get current time and date
+            sendTimeAndDate = System.currentTimeMillis().toString(),
             isFromLocalUser = true
         )
 
         dataTransferService?.sendMessage(bluetoothMessage)
 
+        withContext(ioDispatcher) {
+            messagesDao.insertOrUpdateMessage(
+                MessageEntity.fromDomain(bluetoothMessage,
+                    currentClientSocket?.remoteDevice?.address ?: "Unknown address")
+            )
+        }
+
         return bluetoothMessage
+    }
+
+    override fun getChatMessagesPaged(chatId: String): Flow<PagingData<BluetoothMessage>> {
+        return Pager(
+            PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 20,
+                enablePlaceholders = false
+            )
+        ) {
+            messagesDao.getMessagesByChatId(chatId)
+        }.flow.map { pagingData ->
+            pagingData.map { message ->
+                message.toDomain()
+            }
+        }
     }
 
     override fun closeServerConnection() {
@@ -344,8 +325,24 @@ class BluetoothControllerImpl @Inject constructor(
             controller.emitAll(
                 service
                     .listenForIncomingMessages()
-                    .map { TransferSucceeded(it) }
+                    .map {
+                        messagesDao.insertOrUpdateMessage(MessageEntity.fromDomain(it, socket.remoteDevice.address))
+                        TransferSucceeded(it)
+                    }
             )
+        }
+    }
+
+    private fun createNewChat(socket: BluetoothSocket) {
+        socket.remoteDevice?.let {
+            val chat = ChatEntity(
+                userAddress = socket.remoteDevice.address,
+                // userAddress = socket.remoteDevice.address,
+                senderName = socket.remoteDevice.name ?: "Unknown name",
+                lastMessage = ""
+            )
+
+            chatDao.insertOrUpdateChat(chat)
         }
     }
 

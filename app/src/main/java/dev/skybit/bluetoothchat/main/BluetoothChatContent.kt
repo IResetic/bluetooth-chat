@@ -16,7 +16,13 @@ fun BluetoothChatContent(navController: NavHostController) {
             navController = navController,
             startDestination = HomeDestination
         ) {
-            chatsGraph()
+            // chatsGraph()
+            chatsGraph(
+                navController,
+                navigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

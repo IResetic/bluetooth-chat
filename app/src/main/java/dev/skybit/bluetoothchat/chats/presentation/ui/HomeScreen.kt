@@ -3,6 +3,7 @@
 package dev.skybit.bluetoothchat.chats.presentation.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -17,10 +18,12 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.skybit.bluetoothchat.chats.presentation.ui.HomeScreenEvent.ChatError
 import dev.skybit.bluetoothchat.chats.presentation.ui.HomeScreenEvent.ConnectToBluetoothDevice
 import dev.skybit.bluetoothchat.chats.presentation.ui.HomeScreenEvent.ErrorConnectingToDevice
@@ -41,18 +44,35 @@ import dev.skybit.bluetoothchat.chats.presentation.ui.screens.DevicesScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navigateChat : (chatId: String, senderName: String) -> Unit
+) {
     val viewModel = hiltViewModel<HomeScreenViewModel>()
     val uiState by viewModel.state.collectAsState()
+    // val chatMessages = viewModel.chatMessagesPagingSource.collectAsLazyPagingItems()
+
+    LaunchedEffect(key1 = uiState.chatId) {
+        if(uiState.chatId.isNotEmpty()) {
+            navigateChat(uiState.chatId, uiState.senderName)
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        Log.d("TEST_LE_UNIT", "Back to home screen")
+        viewModel.onEvent(NavigateBackToHomeScreen)
+    }
 
     Scaffold(
         topBar = {
-            HomeScreenTopAppBar(
-                screenType = uiState.currentScreen,
-                navigateBack = {
-                    viewModel.onEvent(NavigateBackToHomeScreen)
-                }
-            )
+            if (uiState.currentScreen !is ChatScreenType) {
+                HomeScreenTopAppBar(
+                    screenType = uiState.currentScreen,
+                    navigateBack = {
+                        viewModel.onEvent(NavigateBackToHomeScreen)
+                    }
+                )
+            }
+
         },
         floatingActionButton = {
             if (uiState.currentScreen == ScreenType.HomeScreenType) {
@@ -87,21 +107,22 @@ fun HomeScreen() {
                             )
                         }
 
-                        items(uiState.chatsMap.keys.toList()) { deviceAddress ->
+   /*                     items(uiState.chatsMap.keys.toList()) { deviceAddress ->
                             uiState.chatsMap[deviceAddress]?.let { message ->
                                 MessageListItem(name = message.name, message = message.lastMessage)
                             }
-                        }
+                        }*/
                     }
                 }
 
                 is ChatScreenType -> {
-                    ChatScreen(
+/*                    ChatScreen(
+                        // chatMessages = viewModel.chatMessagesPagingSource.collectAsLazyPagingItems(),
                         messages = uiState.messages,
                         onErrorHandler = { viewModel.onEvent(ChatError) },
                         isConnectionChannelClosed = uiState.isConnectionChannelClosed,
                         onSendMessage = { viewModel.onEvent(SendMessage(it)) }
-                    )
+                    )*/
                 }
 
                 is DevicesScreenType -> {
