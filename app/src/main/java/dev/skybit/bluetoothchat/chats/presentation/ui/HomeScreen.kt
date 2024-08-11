@@ -14,13 +14,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -41,6 +45,8 @@ import dev.skybit.bluetoothchat.chats.presentation.ui.model.ScreenType.ChatScree
 import dev.skybit.bluetoothchat.chats.presentation.ui.model.ScreenType.DevicesScreenType
 import dev.skybit.bluetoothchat.chats.presentation.ui.screens.ChatScreen
 import dev.skybit.bluetoothchat.chats.presentation.ui.screens.DevicesScreen
+import dev.skybit.bluetoothchat.core.presentation.constants.mediumPadding
+import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -99,20 +105,40 @@ fun HomeScreen(
         ) {
             when (uiState.currentScreen) {
                 is ScreenType.HomeScreenType -> {
-                    LazyColumn {
-                        item {
-                            AvailabilitySwitch(
-                                isConnectionAvailable = uiState.isAvailableForConnection,
-                                changeAvailability = { viewModel.onEvent(SetConnectionAvailability(it)) }
+
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(mediumPadding),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Button(
+                            onClick = {
+                               navigateChat(" ", " ")
+                            }
+                        ) {
+                            Text(
+                                text = "Available to connect",
+                                modifier = Modifier.padding(smallPadding),
+                                style = MaterialTheme.typography.titleMedium
                             )
                         }
 
-   /*                     items(uiState.chatsMap.keys.toList()) { deviceAddress ->
-                            uiState.chatsMap[deviceAddress]?.let { message ->
-                                MessageListItem(name = message.name, message = message.lastMessage)
-                            }
-                        }*/
+                        LazyColumn {
+ /*                           item {
+                                AvailabilitySwitch(
+                                    isConnectionAvailable = uiState.isAvailableForConnection,
+                                    changeAvailability = { viewModel.onEvent(SetConnectionAvailability(it)) }
+                                )
+                            }*/
+
+                            /*                     items(uiState.chatsMap.keys.toList()) { deviceAddress ->
+                                                     uiState.chatsMap[deviceAddress]?.let { message ->
+                                                         MessageListItem(name = message.name, message = message.lastMessage)
+                                                     }
+                                                 }*/
+                        }
                     }
+
                 }
 
                 is ChatScreenType -> {

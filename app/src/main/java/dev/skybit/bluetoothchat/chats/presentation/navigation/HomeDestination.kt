@@ -9,7 +9,7 @@ import androidx.navigation.toRoute
 import dev.skybit.bluetoothchat.chats.presentation.navigation.HomeDestination.MessagesDestination
 import dev.skybit.bluetoothchat.chats.presentation.navigation.HomeDestination.NewChatDestination
 import dev.skybit.bluetoothchat.chats.presentation.ui.HomeScreen
-import dev.skybit.bluetoothchat.messages.presentation.MessagesScreen
+import dev.skybit.bluetoothchat.messages.presentation.ui.MessagesScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -32,7 +32,7 @@ fun NavGraphBuilder.chatsGraph(
         composable<MessagesDestination>(
             enterTransition = { EnterTransition.None }
         ) {
-            HomeScreen(navigateChat  = { chatId, senderName ->
+            HomeScreen(navigateChat = { chatId, senderName ->
                 navController.navigate(
                     NewChatDestination(chatId, senderName)
                 )
