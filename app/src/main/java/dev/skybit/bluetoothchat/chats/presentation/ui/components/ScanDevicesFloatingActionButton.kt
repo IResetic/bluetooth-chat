@@ -44,7 +44,7 @@ fun ScanDevicesFloatingActionButton(
         ) {
             Icon(
                 if (isScanning.value) Icons.Filled.Close else Icons.Filled.Search,
-                "Scan for devices FAB.",
+                contentDescription = stringResource(id = R.string.scan_for_devices_fab_content_description),
                 modifier = Modifier.padding(end = spacing__2x),
                 tint = if (isScanning.value) colorScheme.onPrimary else colorScheme.onPrimaryContainer
 

@@ -166,7 +166,7 @@ fun ChatScreen(
                             )
                             .padding(spacing__2x),
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send message",
+                        contentDescription = stringResource(id = R.string.send_message_content_description),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }

@@ -39,7 +39,7 @@ fun HomeScreenTopAppBar(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Navigate back"
+                        contentDescription = stringResource(id = R.string.navigate_back_content_description)
                     )
                 }
             }

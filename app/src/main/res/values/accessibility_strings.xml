@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home Screen -->
+    <string name="navigate_back_content_description">Navigate back</string>
+
+    <!-- Bluetooth Connections Screen -->
+    <string name="scan_for_devices_fab_content_description">Scan for devices FAB.</string>
+
+    <!-- Chat Screen -->
+    <string name="send_message_content_description">Send message</string>
+</resources>
