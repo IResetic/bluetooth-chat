@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class ChatRepositoryImpl @Inject constructor(
     private val bluetoothController: BluetoothController
-): ChatRepository {
+) : ChatRepository {
     override fun getChatMessagesPaged(chatId: String): Flow<BluetoothMessage> {
         TODO("Not yet implemented")
     }

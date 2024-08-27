@@ -1,10 +1,9 @@
 package dev.skybit.bluetoothchat.chats.domain.controller
 
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import dev.skybit.bluetoothchat.chats.data.db.model.MessageEntity
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.chats.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.chats.domain.model.ConnectionResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,6 +31,8 @@ interface BluetoothController {
     suspend fun trySendMessage(message: String): BluetoothMessage?
 
     fun getChatMessagesPaged(chatId: String): Flow<PagingData<BluetoothMessage>>
+
+    suspend fun getAllChats(): List<ChatInfo>
 
     fun closeServerConnection()
 

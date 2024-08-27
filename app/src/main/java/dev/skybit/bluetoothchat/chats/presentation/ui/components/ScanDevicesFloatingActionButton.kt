@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
 
 @Composable
 fun ScanDevicesFloatingActionButton(
@@ -45,7 +45,7 @@ fun ScanDevicesFloatingActionButton(
             Icon(
                 if (isScanning.value) Icons.Filled.Close else Icons.Filled.Search,
                 "Scan for devices FAB.",
-                modifier = Modifier.padding(end = smallPadding),
+                modifier = Modifier.padding(end = spacing__2x),
                 tint = if (isScanning.value) colorScheme.onPrimary else colorScheme.onPrimaryContainer
 
             )

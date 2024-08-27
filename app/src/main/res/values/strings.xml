@@ -1,15 +1,30 @@
 <resources>
     <string name="app_name">Bluetooth Chat</string>
 
-    <!-- Available Connections Screen -->
+    <!-- Bluetooth Connections Screen -->
     <string name="start_scanning_button_title">Scan</string>
     <string name="stop_scanning_button_title">Stop</string>
     <string name="unknown_connection_name">Unknown</string>
     <string name="pair_devices_header">Paired devices</string>
     <string name="available_devices_header">Available devices</string>
+    <string name="bluetooth_screen_title">Bluetooth Connections</string>
+    <string name="available_to_connect_button_title">Make me available to connect</string>
+
+    <!-- Home screen -->
+    <string name="home_screen_title">Chats</string>
+    <string name="waiting_for_connection_message">Waiting for connection…</string>
+    <string name="cancel_button_title">Cancel</string>
 
     <!-- Chat screen -->
     <string name="chat_message_placeholder">Enter text</string>
     <string name="enter_text_message_placeholder">Please enter the message"</string>
+
+    <!-- Error Dialog -->
+    <string name="error_dialog_connection_error_title">Connection error</string>
+    <string name="error_dialog_connection_error_message">The Connection error has happened. Please check that everything is setup properly</string>
+    <string name="error_dialog_confirm_button_title">Confirm</string>
+    <string name="error_dialog_back_to_home_button_title">Back to home</string>
+    <string name="error_dialog_disconnected_error_title">Disconnected</string>
+    <string name="error_dialog_disconnected_error_message">The user has left the building and close the connection. To stay in the chat press and check messages press OK.</string>
 
 </resources>

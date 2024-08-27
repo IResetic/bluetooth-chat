@@ -31,7 +31,6 @@ fun MessagesList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         items(chatMessages.itemCount) { index ->
             chatMessages[index]?.let {
                 Column(
@@ -47,6 +46,5 @@ fun MessagesList(
                 }
             }
         }
-
     }
 }

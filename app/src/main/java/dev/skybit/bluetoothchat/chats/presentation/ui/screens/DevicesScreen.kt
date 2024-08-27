@@ -50,7 +50,6 @@ fun DevicesScreen(
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        // .padding(paddingValues),
         contentAlignment = Alignment.TopStart
     ) {
         if (isConnecting) {
@@ -68,9 +67,7 @@ fun DevicesScreen(
         }
 
         if (errorMessage != null) {
-            ConnectionErrorDialog(
-                onDismissRequest = onErrorHandler
-            )
+            ConnectionErrorDialog(onDismissRequest = onErrorHandler)
         }
     }
 }

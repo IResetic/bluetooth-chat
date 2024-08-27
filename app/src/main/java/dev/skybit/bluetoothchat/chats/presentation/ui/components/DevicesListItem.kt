@@ -14,10 +14,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import dev.skybit.bluetoothchat.R
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.core.presentation.constants.extraSmallPadding
-import dev.skybit.bluetoothchat.core.presentation.constants.mediumPadding
-import dev.skybit.bluetoothchat.core.presentation.constants.mediumRadius
-import dev.skybit.bluetoothchat.core.presentation.constants.smallPadding
+import dev.skybit.bluetoothchat.core.presentation.constants.radius__2x
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__1x
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
 
 @Composable
 fun DevicesListItem(
@@ -28,8 +28,8 @@ fun DevicesListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = smallPadding, vertical = extraSmallPadding)
-            .clip(RoundedCornerShape(mediumRadius))
+            .padding(horizontal = spacing__2x, vertical = spacing__1x)
+            .clip(RoundedCornerShape(radius__2x))
             .then(
                 if (isConnectingEnabled) {
                     Modifier.clickable(onClick = connectToDevice)
@@ -44,11 +44,11 @@ fun DevicesListItem(
     ) {
         Text(
             device.name ?: stringResource(id = R.string.unknown_connection_name),
-            modifier = Modifier.padding(start = mediumPadding, top = smallPadding)
+            modifier = Modifier.padding(start = spacing__4x, top = spacing__2x)
         )
         Text(
             device.address,
-            modifier = Modifier.padding(start = mediumPadding, bottom = smallPadding)
+            modifier = Modifier.padding(start = spacing__4x, bottom = spacing__2x)
         )
     }
 }

@@ -16,7 +16,6 @@ data class MessageEntity(
 ) {
     fun toDomain() = BluetoothMessage(
         id = id,
-        deviceAddress = chatId,
         senderName = senderName,
         message = text,
         isFromLocalUser = isFromMe,
@@ -26,7 +25,6 @@ data class MessageEntity(
     companion object {
         fun fromDomain(bluetoothMessage: BluetoothMessage, chatId: String) = MessageEntity(
             id = bluetoothMessage.id,
-            //chatId = bluetoothMessage.deviceAddress,
             chatId = chatId,
             senderName = bluetoothMessage.senderName,
             text = bluetoothMessage.message,

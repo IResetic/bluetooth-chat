@@ -2,6 +2,7 @@ package dev.skybit.bluetoothchat.chats.presentation.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,8 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.skybit.bluetoothchat.chats.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__3_5x
+import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
 
 @Composable
 fun ChatMessage(
@@ -22,12 +24,13 @@ fun ChatMessage(
 ) {
     Column(
         modifier = modifier
+            .fillMaxWidth(0.65f)
             .clip(
                 RoundedCornerShape(
-                    topStart = if (message.isFromLocalUser) 15.dp else 0.dp,
-                    topEnd = 15.dp,
-                    bottomStart = 15.dp,
-                    bottomEnd = if (message.isFromLocalUser) 0.dp else 15.dp
+                    topStart = if (message.isFromLocalUser) spacing__3_5x else 0.dp,
+                    topEnd = spacing__3_5x,
+                    bottomStart = spacing__3_5x,
+                    bottomEnd = if (message.isFromLocalUser) 0.dp else spacing__3_5x
                 )
             )
             .background(
@@ -37,17 +40,16 @@ fun ChatMessage(
                     MaterialTheme.colorScheme.primaryContainer
                 }
             )
-            .padding(16.dp)
+            .padding(spacing__4x)
     ) {
         Text(
             text = message.senderName,
-            fontSize = 10.sp,
-            color = Color.Black
+            style = MaterialTheme.typography.bodySmall
         )
         Text(
             text = message.message,
             color = Color.Black,
-            modifier = Modifier.widthIn(max = 250.dp)
+            modifier = Modifier.widthIn(max = 600.dp)
         )
     }
 }
