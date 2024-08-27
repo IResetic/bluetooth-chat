@@ -23,7 +23,7 @@ fun HomeScreenTopAppBar(
     navigateBack: () -> Unit
 ) {
     val title = when (screenType) {
-        is ScreenType.HomeScreenType -> stringResource(id = R.string.home_screen_title)
+        is ScreenType.ChatsListScreenType -> stringResource(id = R.string.home_screen_title)
         is ScreenType.DevicesScreenType -> stringResource(id = R.string.bluetooth_screen_title)
         is ScreenType.ChatScreenType -> screenType.deviceName
     }
@@ -31,7 +31,7 @@ fun HomeScreenTopAppBar(
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-            if (screenType !is ScreenType.HomeScreenType && !isConnecting) {
+            if (screenType !is ScreenType.ChatsListScreenType && !isConnecting) {
                 IconButton(
                     onClick = {
                         navigateBack()

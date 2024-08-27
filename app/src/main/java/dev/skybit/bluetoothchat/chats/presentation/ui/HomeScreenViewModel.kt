@@ -86,7 +86,7 @@ class HomeScreenViewModel @Inject constructor(
                 if (_state.value.currentScreen is ScreenType.ChatScreenType) {
                     bluetoothController.closeConnection()
                 }
-                setCurrentScreenType(ScreenType.HomeScreenType)
+                setCurrentScreenType(ScreenType.ChatsListScreenType)
             }
 
             is SendMessage -> sendMessage(event.message)

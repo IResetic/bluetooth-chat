@@ -12,7 +12,7 @@ data class HomeScreenUiState(
     val isAvailableForConnection: Boolean = false,
     val chatsMap: Map<String, ChatsListUiItem> = emptyMap(),
     val isConnecting: Boolean = false,
-    val currentScreen: ScreenType = ScreenType.HomeScreenType,
+    val currentScreen: ScreenType = ScreenType.ChatsListScreenType,
     val scannedDevices: List<BluetoothDeviceInfo> = emptyList(),
     val pairedDevices: List<BluetoothDeviceInfo> = emptyList(),
     val errorMessage: String? = null,
