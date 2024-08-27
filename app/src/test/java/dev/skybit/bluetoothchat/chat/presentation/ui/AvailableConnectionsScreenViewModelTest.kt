@@ -3,9 +3,9 @@
 package dev.skybit.bluetoothchat.chat.presentation.ui
 
 import app.cash.turbine.test
-import dev.skybit.bluetoothchat.chats.domain.controller.BluetoothController
-import dev.skybit.bluetoothchat.chats.domain.model.BluetoothDeviceInfo
-import dev.skybit.bluetoothchat.chats.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
