@@ -40,13 +40,13 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
-import dev.skybit.bluetoothchat.home.presentation.ui.components.ChatMessage
-import dev.skybit.bluetoothchat.home.presentation.ui.components.LostConnectionDialog
 import dev.skybit.bluetoothchat.core.presentation.constants.elevation__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2_5x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.presentation.ui.components.ChatMessage
+import dev.skybit.bluetoothchat.home.presentation.ui.components.LostConnectionDialog
 import kotlinx.coroutines.flow.Flow
 
 @Composable

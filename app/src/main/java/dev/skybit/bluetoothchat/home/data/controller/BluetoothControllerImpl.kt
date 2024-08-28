@@ -11,10 +11,8 @@ import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.map
+import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
+import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import dev.skybit.bluetoothchat.home.data.db.dao.ChatDao
 import dev.skybit.bluetoothchat.home.data.db.dao.MessagesDao
 import dev.skybit.bluetoothchat.home.data.db.model.ChatEntity
@@ -27,11 +25,8 @@ import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferServiceFa
 import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
-import dev.skybit.bluetoothchat.home.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult.TransferSucceeded
-import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
-import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -103,7 +98,6 @@ class BluetoothControllerImpl @Inject constructor(
 
     init {
         updatePairedDevices()
-
         registerBluetoothStateReceiver()
     }
 
@@ -218,58 +212,26 @@ class BluetoothControllerImpl @Inject constructor(
 
     @SuppressLint("HardwareIds")
     override suspend fun trySendMessage(message: String): BluetoothMessage? {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
-            return null
-        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) { return null }
 
-        if (dataTransferService == null) {
-            return null
-        }
+        if (dataTransferService == null) { return null }
 
-        val bluetoothMessage = BluetoothMessage(
-            id = UUID.randomUUID().toString(),
-            message = message,
-            senderName = bluetoothAdapter?.name ?: "Unknown name",
-            sendTimeAndDate = System.currentTimeMillis().toString(),
-            isFromLocalUser = true
-        )
+        val bluetoothMessage = createBluetoothMessage(message)
 
-        dataTransferService?.sendMessage(bluetoothMessage)
+        val isMessageSend = dataTransferService?.sendMessage(bluetoothMessage) ?: false
 
-        withContext(ioDispatcher) {
-            messagesDao.insertOrUpdateMessage(
-                MessageEntity.fromDomain(
-                    bluetoothMessage,
-                    currentClientSocket?.remoteDevice?.address ?: "Unknown address"
+        if (isMessageSend) {
+            withContext(ioDispatcher) {
+                messagesDao.insertOrUpdateMessage(
+                    MessageEntity.fromDomain(
+                        bluetoothMessage,
+                        currentClientSocket?.remoteDevice?.address ?: "Unknown address"
+                    )
                 )
-            )
+            }
         }
 
         return bluetoothMessage
-    }
-
-    override fun getChatMessagesPaged(chatId: String): Flow<PagingData<BluetoothMessage>> {
-        return Pager(
-            PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 20,
-                enablePlaceholders = false
-            )
-        ) {
-            messagesDao.getMessagesByChatId(chatId)
-        }.flow.map { pagingData ->
-            pagingData.map { message ->
-                message.toDomain()
-            }
-        }
-    }
-
-    override suspend fun getAllChats(): List<ChatInfo> {
-        return withContext(ioDispatcher) {
-            chatDao.getAllChats2().map {
-                it.toDomain()
-            }
-        }
     }
 
     override fun closeServerConnection() {
@@ -282,6 +244,16 @@ class BluetoothControllerImpl @Inject constructor(
         currentServerSocket?.close()
         currentClientSocket = null
         currentServerSocket = null
+    }
+
+    private fun createBluetoothMessage(message: String): BluetoothMessage {
+        return BluetoothMessage(
+            id = UUID.randomUUID().toString(),
+            message = message,
+            senderName = bluetoothAdapter?.name ?: "Unknown name",
+            sendTimeAndDate = System.currentTimeMillis().toString(),
+            isFromLocalUser = true
+        )
     }
 
     private fun registerFoundDeviceReceiver() {
@@ -310,9 +282,7 @@ class BluetoothControllerImpl @Inject constructor(
     }
 
     private fun updatePairedDevices() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
-            return
-        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) { return }
 
         bluetoothAdapter
             ?.bondedDevices

@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__3_5x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 
 @Composable
 fun ChatMessage(

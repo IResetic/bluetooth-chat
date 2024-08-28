@@ -21,12 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.home.presentation.ui.components.MessageListItem
-import dev.skybit.bluetoothchat.home.presentation.ui.components.WaitingForConnection
-import dev.skybit.bluetoothchat.home.presentation.ui.model.ChatsListUiItem
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__8x
+import dev.skybit.bluetoothchat.home.presentation.ui.components.MessageListItem
+import dev.skybit.bluetoothchat.home.presentation.ui.components.WaitingForConnection
+import dev.skybit.bluetoothchat.home.presentation.ui.model.ChatsListUiItem
 
 @Composable
 fun ChatsListScreen(

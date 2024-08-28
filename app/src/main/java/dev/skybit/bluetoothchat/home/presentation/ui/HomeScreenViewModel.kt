@@ -10,6 +10,7 @@ import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
+import dev.skybit.bluetoothchat.home.domain.repository.ChatRepository
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ChatError
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ConnectToBluetoothDevice
 import dev.skybit.bluetoothchat.home.presentation.ui.HomeScreenEvent.ErrorConnectingToDevice
@@ -39,7 +40,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
-    private val bluetoothController: BluetoothController
+    private val bluetoothController: BluetoothController,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
     private var deviceConnectionJob: Job? = null
     private var devicesScanneingJob: Job? = null
@@ -105,7 +107,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getAllChats() {
         viewModelScope.launch {
-            val chats = bluetoothController.getAllChats().map {
+            val chats = chatRepository.getAllChats().map {
                 ChatsListUiItem(it.chatId, it.senderName, it.lastMessage)
             }
             _state.update { currentState ->
@@ -117,7 +119,7 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun setChatMessagesPagingSource(chatId: String): Flow<PagingData<BluetoothMessage>> =
-        bluetoothController.getChatMessagesPaged(chatId)
+        chatRepository.getChatMessagesPaged(chatId)
             .cachedIn(viewModelScope)
 
     private fun setCurrentScreenType(screenType: ScreenType) {

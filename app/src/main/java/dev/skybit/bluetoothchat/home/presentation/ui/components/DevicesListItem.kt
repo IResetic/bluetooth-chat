@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import dev.skybit.bluetoothchat.R
-import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.core.presentation.constants.radius__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__1x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 
 @Composable
 fun DevicesListItem(
