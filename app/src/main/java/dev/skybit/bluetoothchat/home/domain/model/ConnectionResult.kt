@@ -1,9 +1,9 @@
 package dev.skybit.bluetoothchat.home.domain.model
 
 sealed interface ConnectionResult {
-    data class ConnectionEstablished(val senderName: String, val chatId: String) : ConnectionResult
+    data class ConnectionEstablished(val chatInfo: ChatInfo) : ConnectionResult
 
-    data object TransferSucceeded : ConnectionResult
+    data class TransferSucceeded(val message: BluetoothMessage, val chatId: String) : ConnectionResult
 
     data class Error(val message: String) : ConnectionResult
 }

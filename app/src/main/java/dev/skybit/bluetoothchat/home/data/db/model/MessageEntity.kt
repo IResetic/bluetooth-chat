@@ -16,6 +16,7 @@ data class MessageEntity(
 ) {
     fun toDomain() = BluetoothMessage(
         id = id,
+        chatId = chatId,
         senderName = senderName,
         message = text,
         isFromLocalUser = isFromMe,
@@ -23,13 +24,13 @@ data class MessageEntity(
     )
 
     companion object {
-        fun fromDomain(bluetoothMessage: BluetoothMessage, chatId: String) = MessageEntity(
+        fun fromDomain(bluetoothMessage: BluetoothMessage) = MessageEntity(
             id = bluetoothMessage.id,
-            chatId = chatId,
+            chatId = bluetoothMessage.chatId,
             senderName = bluetoothMessage.senderName,
             text = bluetoothMessage.message,
             isFromMe = bluetoothMessage.isFromLocalUser,
-            timestamp = System.currentTimeMillis().toString()
+            timestamp = bluetoothMessage.sendTimeAndDate
         )
     }
 }

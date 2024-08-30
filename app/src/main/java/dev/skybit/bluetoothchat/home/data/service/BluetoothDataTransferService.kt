@@ -38,7 +38,7 @@ class BluetoothDataTransferService @AssistedInject constructor(
 
                 val message = adapter.fromJson(buffer.decodeToString(endIndex = byteCount))
 
-                message?.toDomain(false)?.let { emit(it) }
+                message?.toDomain(false, bluetoothSocket.remoteDevice.address)?.let { emit(it) }
             }
         }.flowOn(ioDispatcher)
     }

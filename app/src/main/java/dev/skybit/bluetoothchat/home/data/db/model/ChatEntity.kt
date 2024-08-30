@@ -16,4 +16,12 @@ data class ChatEntity(
         senderName = senderName,
         lastMessage = lastMessage
     )
+
+    companion object {
+        fun fromDomain(chatInfo: ChatInfo) = ChatEntity(
+            chatId = chatInfo.chatId,
+            senderName = chatInfo.senderName,
+            lastMessage = chatInfo.lastMessage
+        )
+    }
 }

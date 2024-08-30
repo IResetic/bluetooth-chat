@@ -1,10 +1,9 @@
-package dev.skybit.bluetoothchat.chat.data.recevers
+package dev.skybit.bluetoothchat.home.data.recevers
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
-import dev.skybit.bluetoothchat.home.data.recevers.FoundDeviceReceiver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

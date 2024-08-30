@@ -13,10 +13,6 @@ import android.content.pm.PackageManager
 import android.util.Log
 import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
-import dev.skybit.bluetoothchat.home.data.db.dao.ChatDao
-import dev.skybit.bluetoothchat.home.data.db.dao.MessagesDao
-import dev.skybit.bluetoothchat.home.data.db.model.ChatEntity
-import dev.skybit.bluetoothchat.home.data.db.model.MessageEntity
 import dev.skybit.bluetoothchat.home.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.data.recevers.BluetoothStateReceiver
 import dev.skybit.bluetoothchat.home.data.recevers.FoundDeviceReceiver
@@ -25,6 +21,7 @@ import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferServiceFa
 import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
+import dev.skybit.bluetoothchat.home.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult.TransferSucceeded
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,7 +41,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
@@ -53,8 +49,6 @@ import javax.inject.Inject
 class BluetoothControllerImpl @Inject constructor(
     private val context: Context,
     private val bluetoothDataTransferServiceFactory: BluetoothDataTransferServiceFactory,
-    private val chatDao: ChatDao,
-    private val messagesDao: MessagesDao,
     buildVersionProvider: BuildVersionProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BluetoothController {
@@ -154,13 +148,13 @@ class BluetoothControllerImpl @Inject constructor(
 
                 currentClientSocket?.let { socket ->
                     currentServerSocket?.close()
-
-                    createNewChat(socket)
-
                     emit(
                         ConnectionResult.ConnectionEstablished(
-                            socket.remoteDevice?.name ?: "Unknown name",
-                            chatId = socket.remoteDevice.address
+                            chatInfo = ChatInfo(
+                                chatId = socket.remoteDevice.address,
+                                senderName = socket.remoteDevice.name ?: "Unknown name",
+                                lastMessage = ""
+                            )
                         )
                     )
 
@@ -188,13 +182,13 @@ class BluetoothControllerImpl @Inject constructor(
             currentClientSocket?.let { socket ->
                 try {
                     socket.connect()
-                    createNewChat(socket)
-
                     emit(
                         ConnectionResult.ConnectionEstablished(
-                            socket.remoteDevice?.name ?: "Unknown name",
-                            chatId = socket.remoteDevice.address
-                            // chatId = androidId
+                            chatInfo = ChatInfo(
+                                chatId = socket.remoteDevice.address,
+                                senderName = socket.remoteDevice.name ?: "Unknown name",
+                                lastMessage = ""
+                            )
                         )
                     )
 
@@ -220,18 +214,7 @@ class BluetoothControllerImpl @Inject constructor(
 
         val isMessageSend = dataTransferService?.sendMessage(bluetoothMessage) ?: false
 
-        if (isMessageSend) {
-            withContext(ioDispatcher) {
-                messagesDao.insertOrUpdateMessage(
-                    MessageEntity.fromDomain(
-                        bluetoothMessage,
-                        currentClientSocket?.remoteDevice?.address ?: "Unknown address"
-                    )
-                )
-            }
-        }
-
-        return bluetoothMessage
+        return if (isMessageSend) bluetoothMessage else null
     }
 
     override fun closeServerConnection() {
@@ -249,6 +232,7 @@ class BluetoothControllerImpl @Inject constructor(
     private fun createBluetoothMessage(message: String): BluetoothMessage {
         return BluetoothMessage(
             id = UUID.randomUUID().toString(),
+            chatId = currentClientSocket?.remoteDevice?.address ?: "Unknown address",
             message = message,
             senderName = bluetoothAdapter?.name ?: "Unknown name",
             sendTimeAndDate = System.currentTimeMillis().toString(),
@@ -304,24 +288,9 @@ class BluetoothControllerImpl @Inject constructor(
                 service
                     .listenForIncomingMessages()
                     .map {
-                        messagesDao.insertOrUpdateMessage(
-                            MessageEntity.fromDomain(it, socket.remoteDevice.address)
-                        )
-                        TransferSucceeded
+                        TransferSucceeded(it, socket.remoteDevice.address)
                     }
             )
-        }
-    }
-
-    private fun createNewChat(socket: BluetoothSocket) {
-        socket.remoteDevice?.let {
-            val chat = ChatEntity(
-                chatId = socket.remoteDevice.address,
-                senderName = socket.remoteDevice.name ?: "Unknown name",
-                lastMessage = "No messages"
-            )
-
-            chatDao.insertOrUpdateChat(chat)
         }
     }
 

@@ -11,8 +11,9 @@ data class BluetoothMessageDto(
     val sendTimeAndDate: String,
     val isFromLocalUser: Boolean
 ) {
-    fun toDomain(isLocal: Boolean) = BluetoothMessage(
+    fun toDomain(isLocal: Boolean, chatId: String) = BluetoothMessage(
         id = id,
+        chatId = chatId,
         message = message,
         senderName = senderName,
         sendTimeAndDate = sendTimeAndDate,

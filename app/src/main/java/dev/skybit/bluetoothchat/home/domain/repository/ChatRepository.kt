@@ -9,4 +9,8 @@ interface ChatRepository {
     fun getChatMessagesPaged(chatId: String): Flow<PagingData<BluetoothMessage>>
 
     suspend fun getAllChats(): List<ChatInfo>
+
+    suspend fun createNewChat(chatInfo: ChatInfo)
+
+    suspend fun saveMessage(message: BluetoothMessage)
 }

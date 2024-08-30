@@ -216,7 +216,13 @@ class HomeScreenViewModel @Inject constructor(
     private fun sendMessage(message: String) {
         viewModelScope.launch {
             if (message.trim().isNotEmpty()) {
-                bluetoothController.trySendMessage(message)
+                val sendMessage = bluetoothController.trySendMessage(message)
+
+                if (sendMessage != null) {
+                    chatRepository.saveMessage(sendMessage)
+                } else {
+                    // TODO message not sent
+                }
             }
         }
     }
@@ -225,13 +231,19 @@ class HomeScreenViewModel @Inject constructor(
         return onEach { result ->
             when (result) {
                 is ConnectionResult.ConnectionEstablished -> {
+                    chatRepository.createNewChat(result.chatInfo)
+
                     _state.update {
                         it.copy(
-                            currentScreen = ScreenType.ChatScreenType(deviceName = result.senderName),
+                            currentScreen = ScreenType.ChatScreenType(
+                                deviceName = result.chatInfo.senderName
+                            ),
                             isAvailableForConnection = false,
                             isConnected = true,
                             isConnecting = false,
-                            chatMessageListener = setChatMessagesPagingSource(result.chatId)
+                            chatMessageListener = setChatMessagesPagingSource(
+                                result.chatInfo.chatId
+                            )
                         )
                     }
                 }
@@ -246,7 +258,9 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
 
-                is ConnectionResult.TransferSucceeded -> { }
+                is ConnectionResult.TransferSucceeded -> {
+                    chatRepository.saveMessage(result.message)
+                }
             }
         }.catch { _ ->
             bluetoothController.closeConnection()

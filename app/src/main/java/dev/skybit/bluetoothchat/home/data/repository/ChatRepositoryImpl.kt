@@ -7,6 +7,8 @@ import androidx.paging.map
 import dev.skybit.bluetoothchat.core.data.di.IoDispatcher
 import dev.skybit.bluetoothchat.home.data.db.dao.ChatDao
 import dev.skybit.bluetoothchat.home.data.db.dao.MessagesDao
+import dev.skybit.bluetoothchat.home.data.db.model.ChatEntity
+import dev.skybit.bluetoothchat.home.data.db.model.MessageEntity
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.home.domain.repository.ChatRepository
@@ -42,6 +44,22 @@ class ChatRepositoryImpl @Inject constructor(
             chatDao.getAllChats2().map {
                 it.toDomain()
             }
+        }
+    }
+
+    override suspend fun createNewChat(chatInfo: ChatInfo) {
+        withContext(ioDispatcher) {
+            val chatEntity = ChatEntity.fromDomain(chatInfo)
+
+            chatDao.insertOrUpdateChat(chatEntity)
+        }
+    }
+
+    override suspend fun saveMessage(message: BluetoothMessage) {
+        withContext(ioDispatcher) {
+            val messageEntity = MessageEntity.fromDomain(message)
+
+            messagesDao.insertOrUpdateMessage(messageEntity)
         }
     }
 }
