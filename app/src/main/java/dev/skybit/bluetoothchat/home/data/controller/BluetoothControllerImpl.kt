@@ -20,6 +20,7 @@ import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferService
 import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferServiceFactory
 import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothError
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
@@ -196,7 +197,8 @@ class BluetoothControllerImpl @Inject constructor(
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
-                    emit(ConnectionResult.Error("Connection was interrupted $e"))
+                    // emit(ConnectionResult.Error("Connection was interrupted $e"))
+                    emit(ConnectionResult.Error(BluetoothError.CONNECTION_INTERRUPTED))
                 }
             }
         }.onCompletion {
@@ -205,16 +207,19 @@ class BluetoothControllerImpl @Inject constructor(
     }
 
     @SuppressLint("HardwareIds")
-    override suspend fun trySendMessage(message: String): BluetoothMessage? {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) { return null }
+    override suspend fun trySendMessage(message: String): ConnectionResult {
+        // if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) { return ConnectionResult.Error("You don't have bluetooth permission") }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) { return ConnectionResult.Error(BluetoothError.NO_BLUETOOTH_CONNECT_PERMISSION) }
 
-        if (dataTransferService == null) { return null }
+        // if (dataTransferService == null) { return ConnectionResult.Error("No connection established") }
+        if (dataTransferService == null) { return ConnectionResult.Error(BluetoothError.NO_CONNECTION_ESTABLISHED) }
 
         val bluetoothMessage = createBluetoothMessage(message)
 
         val isMessageSend = dataTransferService?.sendMessage(bluetoothMessage) ?: false
 
-        return if (isMessageSend) bluetoothMessage else null
+        // return if (isMessageSend) TransferSucceeded(bluetoothMessage) else ConnectionResult.Error("Message was not sent")
+        return if (isMessageSend) TransferSucceeded(bluetoothMessage) else ConnectionResult.Error(BluetoothError.MESSAGE_NOT_SENT)
     }
 
     override fun closeServerConnection() {
@@ -288,7 +293,7 @@ class BluetoothControllerImpl @Inject constructor(
                 service
                     .listenForIncomingMessages()
                     .map {
-                        TransferSucceeded(it, socket.remoteDevice.address)
+                        TransferSucceeded(it)
                     }
             )
         }

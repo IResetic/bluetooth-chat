@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import dev.skybit.bluetoothchat.R
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothError
 import dev.skybit.bluetoothchat.home.presentation.ui.components.ConnectionErrorDialog
 import dev.skybit.bluetoothchat.home.presentation.ui.components.DevicesListItem
 import dev.skybit.bluetoothchat.home.presentation.ui.components.SectionHeader
@@ -22,7 +23,7 @@ fun DevicesScreen(
     pairedDevices: List<BluetoothDeviceInfo>,
     scannedDevices: List<BluetoothDeviceInfo>,
     isConnecting: Boolean = false,
-    errorMessage: String? = null,
+    bluetoothError: BluetoothError? = null,
     onErrorHandler: () -> Unit,
     connectToDevice: (BluetoothDeviceInfo) -> Unit
 ) {
@@ -66,7 +67,7 @@ fun DevicesScreen(
             }
         }
 
-        if (errorMessage != null) {
+        if (bluetoothError != null) {
             ConnectionErrorDialog(onDismissRequest = onErrorHandler)
         }
     }

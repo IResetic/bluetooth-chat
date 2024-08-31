@@ -1,6 +1,5 @@
 package dev.skybit.bluetoothchat.home.presentation.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -8,6 +7,7 @@ import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothError
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult
 import dev.skybit.bluetoothchat.home.domain.repository.ChatRepository
@@ -44,7 +44,7 @@ class HomeScreenViewModel @Inject constructor(
     private val chatRepository: ChatRepository
 ) : ViewModel() {
     private var deviceConnectionJob: Job? = null
-    private var devicesScanneingJob: Job? = null
+    private var devicesScanningJob: Job? = null
 
     private val _state = MutableStateFlow(HomeScreenUiState())
     val state: StateFlow<HomeScreenUiState> = _state.asStateFlow()
@@ -99,9 +99,7 @@ class HomeScreenViewModel @Inject constructor(
 
             is ErrorConnectingToDevice -> stopConnectingToDevice()
 
-            is ChatError -> stopConnectingToDevice() /*_state.update {
-                it.copy(isConnected = false)
-            }*/
+            is ChatError -> stopConnectingToDevice()
         }
     }
 
@@ -132,7 +130,7 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun startScanAndPairDevicesListener() {
-        devicesScanneingJob = viewModelScope.launch {
+        devicesScanningJob = viewModelScope.launch {
             combine(
                 bluetoothController.scannedDevices,
                 bluetoothController.pairedDevices,
@@ -156,8 +154,8 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun stopScanAndPairDevicesListener() {
-        devicesScanneingJob?.cancel()
-        devicesScanneingJob = null
+        devicesScanningJob?.cancel()
+        devicesScanningJob = null
     }
 
     private fun startIncomingConnectionListener() {
@@ -167,11 +165,10 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun connectToDevice(device: BluetoothDeviceInfo) {
-        Log.d("CURRENT_ERROR_MESSAGE", "Connecting to device: ${state.value.errorMessage}")
         _state.update {
             it.copy(
                 isConnecting = true,
-                errorMessage = null
+                bluetoothError = null
             )
         }
         deviceConnectionJob = bluetoothController
@@ -184,7 +181,7 @@ class HomeScreenViewModel @Inject constructor(
             it.copy(
                 isConnecting = false,
                 isConnected = false,
-                errorMessage = null
+                bluetoothError = null
             )
         }
         deviceConnectionJob?.cancel()
@@ -216,12 +213,12 @@ class HomeScreenViewModel @Inject constructor(
     private fun sendMessage(message: String) {
         viewModelScope.launch {
             if (message.trim().isNotEmpty()) {
-                val sendMessage = bluetoothController.trySendMessage(message)
+                val result = bluetoothController.trySendMessage(message)
 
-                if (sendMessage != null) {
-                    chatRepository.saveMessage(sendMessage)
+                if (result is ConnectionResult.TransferSucceeded) {
+                    chatRepository.saveMessage(result.message)
                 } else {
-                    // TODO message not sent
+                    // TODO emit state that message is not send
                 }
             }
         }
@@ -241,6 +238,7 @@ class HomeScreenViewModel @Inject constructor(
                             isAvailableForConnection = false,
                             isConnected = true,
                             isConnecting = false,
+                            bluetoothError = null,
                             chatMessageListener = setChatMessagesPagingSource(
                                 result.chatInfo.chatId
                             )
@@ -252,7 +250,7 @@ class HomeScreenViewModel @Inject constructor(
                         it.copy(
                             isAvailableForConnection = false,
                             isConnecting = false,
-                            errorMessage = result.message,
+                            bluetoothError = result.error,
                             isConnected = false
                         )
                     }
@@ -267,7 +265,7 @@ class HomeScreenViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isAvailableForConnection = false,
-                    errorMessage = "Unknown error",
+                    bluetoothError = BluetoothError.UNKNOWN_ERROR,
                     isConnecting = false,
                     isConnected = false
                 )

@@ -44,6 +44,7 @@ import dev.skybit.bluetoothchat.core.presentation.constants.elevation__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2_5x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__2x
 import dev.skybit.bluetoothchat.core.presentation.constants.spacing__4x
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothError
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.components.ChatMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.components.LostConnectionDialog
@@ -53,7 +54,7 @@ import kotlinx.coroutines.flow.Flow
 fun ChatScreen(
     chatMessagesFlow: Flow<PagingData<BluetoothMessage>>,
     isConnected: Boolean,
-    errorMessage: String?,
+    bluetoothError: BluetoothError?,
     onErrorHandler: () -> Unit,
     onSendMessage: (String) -> Unit,
     navigateBack: () -> Unit
@@ -174,7 +175,7 @@ fun ChatScreen(
         }
     }
 
-    if (errorMessage != null) {
+    if (bluetoothError != null) {
         LostConnectionDialog(
             onDismissRequest = { onErrorHandler() },
             navigateToHomePage = { navigateBack() }

@@ -89,7 +89,7 @@ fun HomeScreen() {
                     ChatScreen(
                         chatMessagesFlow = uiState.chatMessageListener,
                         isConnected = uiState.isConnected,
-                        errorMessage = uiState.errorMessage,
+                        bluetoothError = uiState.bluetoothError,
                         onErrorHandler = { viewModel.onEvent(ChatError) },
                         onSendMessage = { viewModel.onEvent(SendMessage(it)) },
                         navigateBack = { viewModel.onEvent(NavigateBackToHomeScreen) }
@@ -101,7 +101,6 @@ fun HomeScreen() {
                         pairedDevices = uiState.pairedDevices,
                         scannedDevices = uiState.scannedDevices,
                         isConnecting = uiState.isConnecting,
-                        errorMessage = uiState.errorMessage,
                         onErrorHandler = { viewModel.onEvent(ErrorConnectingToDevice) },
                         connectToDevice = { viewModel.onEvent(ConnectToBluetoothDevice(it)) }
                     )

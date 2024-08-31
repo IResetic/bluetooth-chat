@@ -2,6 +2,7 @@ package dev.skybit.bluetoothchat.home.presentation.ui
 
 import androidx.paging.PagingData
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.BluetoothError
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothMessage
 import dev.skybit.bluetoothchat.home.presentation.ui.model.ChatsListUiItem
 import dev.skybit.bluetoothchat.home.presentation.ui.model.ScreenType
@@ -15,7 +16,7 @@ data class HomeScreenUiState(
     val currentScreen: ScreenType = ScreenType.ChatsListScreenType,
     val scannedDevices: List<BluetoothDeviceInfo> = emptyList(),
     val pairedDevices: List<BluetoothDeviceInfo> = emptyList(),
-    val errorMessage: String? = null,
+    val bluetoothError: BluetoothError? = null,
     val isConnected: Boolean = false,
     val chatMessageListener: Flow<PagingData<BluetoothMessage>> = flowOf(PagingData.empty())
 )
