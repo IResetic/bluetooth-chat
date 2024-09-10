@@ -12,14 +12,12 @@ import android.content.pm.PackageManager
 import app.cash.turbine.test
 import dev.skybit.bluetoothchat.core.presentation.utils.BuildVersionProvider
 import dev.skybit.bluetoothchat.home.data.controller.BluetoothControllerImpl.Companion.SERVICE_UUID
-import dev.skybit.bluetoothchat.home.data.db.dao.ChatDao
-import dev.skybit.bluetoothchat.home.data.db.dao.MessagesDao
-import dev.skybit.bluetoothchat.home.data.db.model.ChatEntity
 import dev.skybit.bluetoothchat.home.data.mappers.toBluetoothDeviceInfo
 import dev.skybit.bluetoothchat.home.data.recevers.FoundDeviceReceiver
 import dev.skybit.bluetoothchat.home.data.service.BluetoothDataTransferServiceFactory
 import dev.skybit.bluetoothchat.home.domain.controller.BluetoothController
 import dev.skybit.bluetoothchat.home.domain.model.BluetoothDeviceInfo
+import dev.skybit.bluetoothchat.home.domain.model.ChatInfo
 import dev.skybit.bluetoothchat.home.domain.model.ConnectionResult.ConnectionEstablished
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -177,19 +175,13 @@ class BluetoothControllerTest {
         initSut(context)
     }
 
-    private fun initSut(
-        context: Context = mockContext(),
-        chatDao: ChatDao = createChatDao(),
-        messageDao: MessagesDao = createMessageDao()
-    ) {
+    private fun initSut(context: Context = mockContext()) {
         val buildVersionProvider = createBuildVersionProvider()
         val bluetoothDataTransferServiceFactory = createBluetoothDataTransferServiceFactory()
 
         sut = BluetoothControllerImpl(
             context,
             bluetoothDataTransferServiceFactory,
-            chatDao,
-            messageDao,
             buildVersionProvider,
             testDispatcher
         )
@@ -197,18 +189,6 @@ class BluetoothControllerTest {
 
     private fun createBluetoothDataTransferServiceFactory(): BluetoothDataTransferServiceFactory {
         return mockk<BluetoothDataTransferServiceFactory>(relaxed = true)
-    }
-
-    private fun createChatDao(): ChatDao {
-        return mockk<ChatDao>(relaxed = true) {
-            every { insertOrUpdateChat(any()) } returns Unit
-        }
-    }
-
-    private fun createMessageDao(): MessagesDao {
-        return mockk<MessagesDao>(relaxed = true) {
-            every { insertOrUpdateMessage(any()) } returns Unit
-        }
     }
 
     private fun createBuildVersionProvider(): BuildVersionProvider {
@@ -348,28 +328,26 @@ class BluetoothControllerTest {
     @Test
     fun `should start Bluetooth server and emit ConnectionEstablished`() = runBlocking {
         // define test data
-        val mockChatDao = createChatDao()
         val clientSocket = setClientSocket()
         val bluetoothAdapter: BluetoothAdapter = setBluetoothAdapter(mockClientSocket = clientSocket)
 
         // Init sut
         val context = mockContext(bluetoothAdapter = bluetoothAdapter)
-        initSut(context = context, chatDao = mockChatDao)
+        initSut(context = context)
 
         // trigger action
         val flow = sut.startBluetoothServer()
 
         // check assertion
-        val expectedChatEntity = ChatEntity(
-            chatId = clientSocket.remoteDevice.address,
-            senderName = clientSocket.remoteDevice.name,
-            lastMessage = "No messages"
-        )
         flow.test {
-            assertEquals(ConnectionEstablished("name", "address"), awaitItem())
+            val expected = ChatInfo(
+                chatId = "address",
+                senderName = "name",
+                lastMessage = ""
+            )
+            assertEquals(ConnectionEstablished(expected), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
-        verify { mockChatDao.insertOrUpdateChat(expectedChatEntity) }
     }
 
     private fun setClientSocket(name: String = "name", address: String = "address"): BluetoothSocket {

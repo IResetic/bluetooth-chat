@@ -4,16 +4,12 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import dev.skybit.bluetoothchat.home.data.db.model.ChatEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChatDao {
 
     @Upsert
     fun insertOrUpdateChat(chatMessages: ChatEntity)
-
-    @Query("SELECT * FROM chats")
-    fun getAllChats(): Flow<List<ChatEntity>>
 
     @Query(
         """
@@ -28,5 +24,5 @@ interface ChatDao {
         )
         """
     )
-    suspend fun getAllChats2(): List<ChatEntity>
+    suspend fun getAllChats(): List<ChatEntity>
 }

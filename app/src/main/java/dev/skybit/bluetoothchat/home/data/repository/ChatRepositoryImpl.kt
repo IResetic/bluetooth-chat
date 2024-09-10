@@ -41,7 +41,7 @@ class ChatRepositoryImpl @Inject constructor(
 
     override suspend fun getAllChats(): List<ChatInfo> {
         return withContext(ioDispatcher) {
-            chatDao.getAllChats2().map {
+            chatDao.getAllChats().map {
                 it.toDomain()
             }
         }
