@@ -63,7 +63,7 @@ class HomeScreenViewModel @Inject constructor(
             is SetConnectionAvailability -> setConnectionAvailability(event.isAvailable)
 
             is NavigateToDevicesScreen -> {
-                stopConnectingToDevice()
+                clearAfterConnectionIsBroken()
                 startScanAndPairDevicesListener()
                 setCurrentScreenType(ScreenType.DevicesScreenType)
             }
@@ -79,7 +79,7 @@ class HomeScreenViewModel @Inject constructor(
 
             is NavigateBackToHomeScreen -> {
                 getAllChats()
-                stopConnectingToDevice()
+                clearAfterConnectionIsBroken()
 
                 if (_state.value.currentScreen is ScreenType.DevicesScreenType) {
                     stopScanAndPairDevicesListener()
@@ -97,9 +97,9 @@ class HomeScreenViewModel @Inject constructor(
 
             is ScanForDevices -> if (event.isScanning) stopScanning() else startScanning()
 
-            is ErrorConnectingToDevice -> stopConnectingToDevice()
+            is ErrorConnectingToDevice -> clearAfterConnectionIsBroken()
 
-            is ChatError -> stopConnectingToDevice()
+            is ChatError -> clearAfterConnectionIsBroken()
         }
     }
 
@@ -139,8 +139,6 @@ class HomeScreenViewModel @Inject constructor(
                 state.copy(
                     scannedDevices = scannedDevices,
                     pairedDevices = pairedDevices
-                    // TODO Check if this is needed. This is here to clear message hisory for a new connection
-                    // messages = if (state.isConnectedWithOtherDevice) state. else emptyList()
                 )
             }.stateIn(viewModelScope, SharingStarted.Lazily, _state.value).collect { newState ->
                 _state.update {
@@ -176,7 +174,7 @@ class HomeScreenViewModel @Inject constructor(
             .listen()
     }
 
-    private fun stopConnectingToDevice() {
+    private fun clearAfterConnectionIsBroken() {
         _state.update {
             it.copy(
                 isConnecting = false,
